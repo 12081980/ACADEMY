@@ -1,84 +1,77 @@
-<!DOCTYPE html>
-<html lang="pt-br">
+<?php include __DIR__ . '/../templates/header.php'; ?>
 
-<head>
-    <meta charset="UTF-8">
-    <title>Treinos Realizados</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-        }
+<div class="container">
+    <h2>🏋️‍♂️ Treinos Realizados</h2>
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        th,
-        td {
-            padding: 10px;
-            border: 1px solid #ddd;
-            text-align: left;
-        }
-
-        th {
-            background-color: #007bff;
-            color: white;
-        }
-
-        .paginacao {
-            margin-top: 20px;
-            text-align: center;
-        }
-
-        .paginacao a {
-            margin: 0 5px;
-            padding: 8px 12px;
-            border: 1px solid #007bff;
-            border-radius: 5px;
-            text-decoration: none;
-            color: #007bff;
-        }
-
-        .paginacao a.ativo,
-        .paginacao a:hover {
-            background: #007bff;
-            color: #fff;
-        }
-    </style>
-</head>
-
-<body>
-    <h1>Treinos Realizados</h1>
-
-    <?php if (!empty($treinos)): ?>
-        <table>
+    <table class="treinos-table" border="1" cellpadding="8" cellspacing="0">
+        <thead>
             <tr>
-                <th>Nome</th>
-                <th>Data</th>
-                <th>Duração (min)</th>
+                <th>Data do Treino</th>
+                <th>Tipo</th>
+                <th>Exercício</th>
+                <th>Séries</th>
+                <th>Repetições</th>
+                <th>Peso (kg)</th>
+                <th>Total de Exercícios</th>
+                <th>Peso Total (kg)</th>
             </tr>
-            <?php foreach ($treinos as $treino): ?>
+        </thead>
+        <tbody>
+            <?php if (!empty($treinos)): ?>
+                <?php foreach ($treinos as $treino): ?>
+                    <?php
+                    $totalExercicios = !empty($treino['exercicios']) ? count($treino['exercicios']) : 0;
+                    $pesoTotal = !empty($treino['exercicios']) ? array_sum(array_column($treino['exercicios'], 'carga')) : 0;
+                    $nomesExercicios = [];
+                    $seriesEx = [];
+                    $repsEx = [];
+                    $pesoEx = [];
+                    if (!empty($treino['exercicios'])) {
+                        foreach ($treino['exercicios'] as $ex) {
+                            $nomesExercicios[] = $ex['nome'];
+                            $seriesEx[] = $ex['series'];
+                            $repsEx[] = $ex['repeticoes'];
+                            $pesoEx[] = number_format($ex['carga'], 2, ',', '.');
+                        }
+                    }
+                    ?>
+                    <tr>
+                        <td><?= date('d/m/Y', strtotime($treino['data_inicio'])); ?></td>
+                        <td><?= htmlspecialchars($treino['tipo']); ?></td>
+                        <td><?= !empty($nomesExercicios) ? implode(', ', $nomesExercicios) : 'Nenhum exercício registrado'; ?>
+                        </td>
+                        <td><?= !empty($seriesEx) ? implode(', ', $seriesEx) : '-'; ?></td>
+                        <td><?= !empty($repsEx) ? implode(', ', $repsEx) : '-'; ?></td>
+                        <td><?= !empty($pesoEx) ? implode(', ', $pesoEx) : '-'; ?></td>
+                        <td><?= $totalExercicios; ?></td>
+                        <td><?= number_format($pesoTotal, 2, ',', '.'); ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            <?php else: ?>
                 <tr>
-                    <td><?= htmlspecialchars($treino['nome']) ?></td>
-                    <td><?= htmlspecialchars($treino['data_realizacao']) ?></td>
-                    <td><?= htmlspecialchars($treino['duracao']) ?></td>
+                    <td colspan="8" style="text-align:center;">Nenhum treino realizado ainda.</td>
                 </tr>
-            <?php endforeach; ?>
-        </table>
+            <?php endif; ?>
+        </tbody>
+    </table>
+</div>
 
-        <div class="paginacao">
-            <?php for ($i = 1; $i <= $totalPaginas; $i++): ?>
-                <a href="?pagina=<?= $i ?>" class="<?= ($i == $pagina) ? 'ativo' : '' ?>"><?= $i ?></a>
-            <?php endfor; ?>
-        </div>
-    <?php else: ?>
-        <p>Nenhum treino realizado encontrado.</p>
-    <?php endif; ?>
-    <!-- Botão Voltar -->
-    <button onclick="window.location.href='/ACADEMY/public/home'">Voltar</button>
-</body>
+<style>
+    .treinos-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
 
-</html>
+    .treinos-table th,
+    .treinos-table td {
+        border: 1px solid #ccc;
+        padding: 8px;
+        text-align: center;
+    }
+
+    .treinos-table th {
+        background-color: #007bff;
+    }
+</style>
+<?php include __DIR__ . '/../templates/footer.php'; ?>

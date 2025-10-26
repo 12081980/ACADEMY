@@ -1,127 +1,64 @@
-<?php
-// Garante que a sessão esteja iniciada
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+<?php include __DIR__ . '/../templates/header.php'; ?>
 
-// Nome do usuário
-$usuarioNome = $_SESSION['usuario']['nome'] ?? 'Usuário';
+<h2>Gráfico de Evolução</h2>
 
-// Garante que $dadosTreinos existe
-if (!isset($dadosTreinos) || !is_array($dadosTreinos)) {
-    $dadosTreinos = [];
-}
-
-// Formata os dados para JS
-$dadosTreinosJson = json_encode(
-    $dadosTreinos,
-    JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
-);
-?>
-
-<?php
-include __DIR__ . '/../../Views/templates/header.php';
-?>
-
-<h1>Evolução do Treino de <?= htmlspecialchars($usuarioNome) ?></h1>
-
-<canvas id="graficoEvolucao" width="500" height="200"></canvas>
-<br>
-<button onclick="window.location.href='/ACADEMY/public/home'">Voltar</button>
+<canvas id="graficoEvolucao" width="600" height="300"></canvas>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    const dadosTreinos = <?= $dadosTreinosJson ?>;
+    document.addEventListener("DOMContentLoaded", function () {
+        const ctx = document.getElementById("graficoEvolucao").getContext("2d");
 
-    const labels = dadosTreinos.map(t => {
-        if (t.data_realizacao) {
-            const dt = new Date(t.data_realizacao);
-            return dt.toLocaleDateString('pt-BR');
-        }
-        return '—';
-    });
+        // Dados vindos do controller (passados do PHP para JS)
+        const treinos = <?= json_encode($treinos ?? []); ?>;
 
-    const duracoes = dadosTreinos.map(t => t.duracao ? parseFloat(t.duracao) : 0);
+        // Organizar dados para o gráfico
+        const labels = treinos.map(t => t.data_fim || t.data_inicio);
+        const qtdExercicios = treinos.map(t => parseInt(t.qtd_exercicios || 0));
+        const pesoTotal = treinos.map(t => parseFloat(t.peso_total || 0));
 
-    const quantExercicios = dadosTreinos.map(t => {
-        if (t.exercicios) {
-            try {
-                const exs = JSON.parse(t.exercicios);
-                return exs.length;
-            } catch {
-                return 0;
-            }
-        }
-        return 0;
-    });
-
-    const pesos = dadosTreinos.map(t => t.peso ? parseFloat(t.peso) : null);
-
-    const ctx = document.getElementById('graficoEvolucao').getContext('2d');
-
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [
-                {
-                    label: 'Duração do Treino (min)',
-                    data: duracoes,
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    fill: true,
-                    tension: 0.3,
-                    yAxisID: 'y'
+        new Chart(ctx, {
+            type: "bar", // ✅ gráfico de colunas
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: "Qtd Exercícios",
+                        data: qtdExercicios,
+                        backgroundColor: "rgba(54, 162, 235, 0.7)",
+                        borderColor: "rgba(54, 162, 235, 1)",
+                        borderWidth: 1
+                    },
+                    {
+                        label: "Peso Total (kg)",
+                        data: pesoTotal,
+                        backgroundColor: "rgba(255, 99, 132, 0.7)",
+                        borderColor: "rgba(255, 99, 132, 1)",
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: "top" },
+                    title: {
+                        display: true,
+                        text: "Evolução dos Treinos"
+                    }
                 },
-                {
-                    label: 'Quantidade de Exercícios',
-                    data: quantExercicios,
-                    borderColor: 'rgba(255, 99, 132, 1)',
-                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                    fill: true,
-                    tension: 0.3,
-                    yAxisID: 'y1'
-                },
-                {
-                    label: 'Peso (kg)',
-                    data: pesos,
-                    borderColor: 'rgba(255, 206, 86, 1)',
-                    backgroundColor: 'rgba(255, 206, 86, 0.2)',
-                    fill: false,
-                    tension: 0.3,
-                    yAxisID: 'y2'
+                scales: {
+                    x: {
+                        title: { display: true, text: "Data do Treino" }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: "Valores" }
+                    }
                 }
-            ]
-        },
-        options: {
-            responsive: true,
-            interaction: { mode: 'index', intersect: false },
-            stacked: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    position: 'left',
-                    title: { display: true, text: 'Duração (min)' }
-                },
-                y1: {
-                    beginAtZero: true,
-                    position: 'right',
-                    offset: true,
-                    grid: { drawOnChartArea: false },
-                    title: { display: true, text: 'Quantidade de Exercícios' }
-                },
-                y2: {
-                    beginAtZero: false,
-                    position: 'right',
-                    offset: true,
-                    grid: { drawOnChartArea: false },
-                    title: { display: true, text: 'Peso (kg)' }
-                },
-                x: { title: { display: true, text: 'Data' } }
             }
-        }
+        });
     });
 </script>
-<?php
-include __DIR__ . '/../../Views/templates/footer.php';
-?>
+
+<?php include __DIR__ . '/../templates/footer.php'; ?>

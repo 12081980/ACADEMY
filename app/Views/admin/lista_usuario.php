@@ -1,35 +1,59 @@
-<?php
-include __DIR__ . '/../../Views/templates/header.php';
-?>
-<h1>Usuários e Treinos</h1>
-<table border="1" cellpadding="5">
-    <tr>
-        <th>Nome</th>
-        <th>Email</th>
-        <th>Treinos Realizados</th>
-    </tr>
-    <?php foreach ($usuarios as $usuario): ?>
+<?php include __DIR__ . '/../templates/menuAdmin.php'; ?>
+
+<!-- <main class="dashboard-container"> -->
+<table>
+    <thead>
         <tr>
-            <td><?= htmlspecialchars($usuario['nome']) ?></td>
-            <td><?= htmlspecialchars($usuario['email']) ?></td>
-            <td>
-                <?php if (!empty($usuario['treinos'])): ?>
-                    <ul>
-                        <?php foreach ($usuario['treinos'] as $treino): ?>
-                            <li>
-                                <?= htmlspecialchars($treino['treino_nome']) ?>
-                                - <?= !empty($treino['data_treino']) ? date('d/m/Y', strtotime($treino['data_treino'])) : '—' ?>
-                                (<?= htmlspecialchars($treino['tipo_treino'] ?? '—') ?>)
-                            </li>
-                        <?php endforeach; ?>
-                    </ul>
-                <?php else: ?>
-                    —
-                <?php endif; ?>
-            </td>
+            <th>Nome</th>
+            <th>Email</th>
+            <th>Tipo</th>
+            <th>Ações</th>
         </tr>
-    <?php endforeach; ?>
+    </thead>
+    <tbody>
+        <?php if (!empty($usuarios)): ?>
+            <?php foreach ($usuarios as $user): ?>
+                <tr>
+                    <td><?= htmlspecialchars($user['nome'] ?? '') ?></td>
+                    <td><?= htmlspecialchars($user['email'] ?? '') ?></td>
+                    <td><?= htmlspecialchars($user['tipo'] ?? 'Usuário') ?></td>
+                    <td class="actions">
+                        <a href="/ACADEMY/public/admin/editar_usuario/<?= htmlspecialchars($user['id'] ?? '') ?>"
+                            class="button editar">Editar</a>
+                        <button class="button excluir"
+                            onclick="excluirUsuario(<?= htmlspecialchars($user['id'] ?? '0') ?>)">Excluir</button>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <tr>
+                <td colspan="4" style="text-align:center;">Nenhum usuário encontrado.</td>
+            </tr>
+        <?php endif; ?>
+    </tbody>
 </table>
-<?php
-include __DIR__ . '/../../Views/templates/footer.php';
-?>
+
+<script>
+    function excluirUsuario(id) {
+        if (!confirm('Tem certeza que deseja excluir este usuário?')) return;
+
+        fetch(`/ACADEMY/public/admin/excluir_usuario/${id}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ id })
+        })
+            .then(res => res.json())
+            .then(data => {
+                alert(data.mensagem);
+                if (data.status === 'sucesso') {
+                    location.reload(); // 🔄 Atualiza a página para refletir a exclusão
+                }
+            })
+            .catch(() => alert('Erro ao excluir usuário.'));
+    }
+
+</script>
+
+<?php include __DIR__ . '/../templates/footerAdmin.php'; ?>

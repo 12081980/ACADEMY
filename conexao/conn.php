@@ -1,13 +1,13 @@
 <?php
-$servidor = "localhost";
-$usuario = "root";
-$senha = "";
-$banco = "academy";
+$host = 'localhost';
+$db = 'academy';
+$user = 'root';
+$pass = '';
+$charset = 'utf8mb4';
 
-$conn = new mysqli($servidor, $usuario, $senha, $banco);
-
-// Verifica a conexão
-if ($conn->connect_error) {
-    die("Falha na conexão: " . $conn->connect_error);
+try {
+    $conn = new PDO("mysql:host=$host;dbname=$db;charset=$charset", $user, $pass);
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    die("Erro na conexão: " . $e->getMessage());
 }
-?>

@@ -15,7 +15,7 @@ try {
 $email = $_POST['email'] ?? '';
 $senha = $_POST['senha'] ?? '';
 
-$stmt = $this->conn->prepare("SELECT * FROM usuarios WHERE email = ?");
+$stmt = $this->conn->prepare("SELECT * FROM usuario WHERE email = ?");
 $stmt->execute([$email]);
 $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
 

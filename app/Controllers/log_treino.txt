@@ -1,0 +1,6 @@
+Array
+(
+    [nome] => Treino A
+    [descricao] => Treino personalizado
+    [exercicios] => [{"nome":"Mesa Flexora","series":"1","repeticoes":"1","peso":"1"}]
+)

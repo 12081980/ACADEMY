@@ -1,199 +1,172 @@
 <?php
+require_once __DIR__ . '/../Models/UsuarioModel.php';
+
 class UsuarioController
 {
-    private $conn;
+    private $usuarioModel;
+    private $conn; // ✅ DECLARE AQUI
 
-    public function __construct()
+    public function __construct($conn)
     {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
-        // Usa a conexão global criada no conn.php (PDO)
-        if (!isset($GLOBALS['conn']) || !$GLOBALS['conn']) {
-            http_response_code(500);
-            exit('Conexão com BD não inicializada.');
-        }
-        $this->conn = $GLOBALS['conn'];
+        $this->conn = $conn; // ✅ define a conexão
+        $this->usuarioModel = new UsuarioModel($conn);
     }
 
-    private function json($payload, $code = 200)
+    public function perfil()
     {
-        http_response_code($code);
-        header('Content-Type: application/json; charset=utf-8');
-        echo json_encode($payload);
+        session_start();
+        if (!isset($_SESSION['usuario']['id'])) {
+            header("Location: /login");
+            exit;
+        }
+
+        $usuarioId = $_SESSION['usuario']['id'];
+        $usuario = $this->usuarioModel->getById($usuarioId);
+        require_once __DIR__ . '/../Views/usuario/perfil.php';
+    }
+
+    public function excluir($id)
+    {
+        if ($this->usuarioModel->delete($id)) {
+            $_SESSION['mensagem'] = "Usuário excluído com sucesso!";
+        } else {
+            $_SESSION['mensagem'] = "Erro ao excluir usuário!";
+        }
+        header("Location: /ACADEMY/public/admin/lista_usuario");
         exit;
     }
 
-    private function exigirLogin()
-    {
-        if (empty($_SESSION['usuario']['id'])) {
-            $this->json([
-                'status' => 'erro',
-                'mensagem' => 'Usuário não logado!',
-                'redirect' => '/ACADEMY/public/login'
-            ], 401);
-        }
-    }
-
-    // Exibe a página de perfil
-    public function perfil()
-    {
-        $this->exigirLogin();
-        $id = (int) $_SESSION['usuario']['id'];
-
-        // Garantir que temos nome/email atualizados via BD
-        $stmt = $this->conn->prepare("SELECT nome, email FROM usuarios WHERE id = :id");
-        $stmt->execute([':id' => $id]);
-        $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($usuario) {
-            $_SESSION['usuario']['nome'] = $usuario['nome'];
-            $_SESSION['usuario']['email'] = $usuario['email'];
-        }
-
-        include __DIR__ . '/../Views/usuario/perfil.php';
-    }
-
-    // Salvar alterações (nome, email, senha opcional)
     public function atualizar()
     {
-        $this->exigirLogin();
+        session_start();
+        header('Content-Type: application/json');
 
-        $id = (int) $_SESSION['usuario']['id'];
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            echo json_encode(['status' => 'erro', 'mensagem' => 'Método não permitido.']);
+            exit;
+        }
+
+        if (!isset($_SESSION['usuario']['id'])) {
+            echo json_encode(['status' => 'erro', 'mensagem' => 'Usuário não autenticado.']);
+            exit;
+        }
+
+        $usuarioId = $_SESSION['usuario']['id'];
+
         $nome = trim($_POST['nome'] ?? '');
         $email = trim($_POST['email'] ?? '');
-        $senha = trim($_POST['senha'] ?? '');
+        $senha = $_POST['senha'] ?? '';
+        $telefone = trim($_POST['telefone'] ?? null);
+        $data_nascimento = $_POST['data_nascimento'] ?? null;
+        $endereco = trim($_POST['endereco'] ?? null);
+        $plano = $_POST['plano'] ?? null;
+        $objetivo = trim($_POST['objetivo'] ?? null);
+        $genero = $_POST['genero'] ?? null;
 
-        if ($nome === '' || $email === '') {
-            $this->json(['status' => 'erro', 'mensagem' => 'Nome e email são obrigatórios.'], 422);
+        if (!$nome || !$email) {
+            echo json_encode(['status' => 'erro', 'mensagem' => 'Preencha os campos obrigatórios!']);
+            exit;
         }
 
+        $query = "UPDATE usuario SET 
+            nome = :nome, 
+            email = :email, 
+            telefone = :telefone, 
+            data_nascimento = :data_nascimento, 
+            endereco = :endereco, 
+            plano = :plano, 
+            objetivo = :objetivo, 
+            genero = :genero";
+
+        $params = [
+            ':nome' => $nome,
+            ':email' => $email,
+            ':telefone' => $telefone,
+            ':data_nascimento' => $data_nascimento,
+            ':endereco' => $endereco,
+            ':plano' => $plano,
+            ':objetivo' => $objetivo,
+            ':genero' => $genero,
+            ':id' => $usuarioId
+        ];
+
+        if (!empty($senha)) {
+            $query .= ", senha = :senha";
+            $params[':senha'] = password_hash($senha, PASSWORD_DEFAULT);
+        }
+
+        $query .= " WHERE id = :id";
+
         try {
-            if ($senha !== '') {
-                $hash = password_hash($senha, PASSWORD_DEFAULT);
-                $sql = "UPDATE usuarios SET nome = :nome, email = :email, senha = :senha WHERE id = :id";
-                $ok = $this->conn->prepare($sql)->execute([
-                    ':nome' => $nome,
-                    ':email' => $email,
-                    ':senha' => $hash,
-                    ':id' => $id
+            $stmt = $this->conn->prepare($query);
+            if ($stmt->execute($params)) {
+                $_SESSION['usuario'] = array_merge($_SESSION['usuario'], [
+                    'nome' => $nome,
+                    'email' => $email,
+                    'telefone' => $telefone,
+                    'data_nascimento' => $data_nascimento,
+                    'endereco' => $endereco,
+                    'plano' => $plano,
+                    'objetivo' => $objetivo,
+                    'genero' => $genero
                 ]);
-            } else {
-                $sql = "UPDATE usuarios SET nome = :nome, email = :email WHERE id = :id";
-                $ok = $this->conn->prepare($sql)->execute([
-                    ':nome' => $nome,
-                    ':email' => $email,
-                    ':id' => $id
-                ]);
-            }
 
-            if ($ok) {
-                // Atualiza sessão
-                $_SESSION['usuario']['nome'] = $nome;
-                $_SESSION['usuario']['email'] = $email;
-
-                $this->json([
+                echo json_encode([
                     'status' => 'sucesso',
                     'mensagem' => 'Perfil atualizado com sucesso!',
-                    'redirect' => '/ACADEMY/public/usuario/home'
+                    'redirect' => '/ACADEMY/public/usuario/perfil'
                 ]);
             } else {
-                $this->json(['status' => 'erro', 'mensagem' => 'Falha ao atualizar.'], 500);
+                echo json_encode(['status' => 'erro', 'mensagem' => 'Erro ao atualizar perfil.']);
             }
-        } catch (Throwable $e) {
-            $this->json(['status' => 'erro', 'mensagem' => 'Erro no servidor: ' . $e->getMessage()], 500);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'erro', 'mensagem' => 'Erro: ' . $e->getMessage()]);
         }
     }
 
-    // Excluir perfil + treinos
     public function excluirPerfil()
     {
-        $this->exigirLogin();
-        $id = (int) $_SESSION['usuario']['id'];
+        session_start();
+        header('Content-Type: application/json');
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            echo json_encode(['status' => 'erro', 'mensagem' => 'Método não permitido.']);
+            exit;
+        }
+
+        if (!isset($_SESSION['usuario']['id'])) {
+            echo json_encode(['status' => 'erro', 'mensagem' => 'Usuário não autenticado.']);
+            exit;
+        }
+
+        $usuarioId = $_SESSION['usuario']['id'];
 
         try {
-            $this->conn->beginTransaction();
+            $stmt = $this->conn->prepare("DELETE FROM usuario WHERE id = :id");
+            $stmt->bindParam(':id', $usuarioId);
 
-            // Apaga treinos realizados (tabela/coluna corretas)
-            $this->conn->prepare("DELETE FROM treinos_realizados WHERE id_usuario = :id")
-                ->execute([':id' => $id]);
+            if ($stmt->execute()) {
+                session_unset();
+                session_destroy();
 
-            // (Opcional) Se existir uma tabela 'treinos' com outra coluna, tentamos também:
-            try {
-                $this->conn->prepare("DELETE FROM treinos WHERE id_usuario = :id")->execute([':id' => $id]);
-            } catch (Throwable $ignore) {
-                // ignora se tabela/coluna não existir
+                echo json_encode([
+                    'status' => 'sucesso',
+                    'mensagem' => 'Perfil excluído com sucesso!',
+                    'redirect' => '/ACADEMY/public/home'
+                ]);
+            } else {
+                echo json_encode(['status' => 'erro', 'mensagem' => 'Erro ao excluir perfil.']);
             }
-
-            // Apaga usuário
-            $this->conn->prepare("DELETE FROM usuarios WHERE id = :id")->execute([':id' => $id]);
-
-            $this->conn->commit();
-
-            session_destroy();
-
-            $this->json([
-                'status' => 'sucesso',
-                'mensagem' => 'Perfil excluído com sucesso!',
-                'redirect' => '/ACADEMY/public/'
-            ]);
-        } catch (Throwable $e) {
-            if ($this->conn->inTransaction()) {
-                $this->conn->rollBack();
-            }
-            $this->json(['status' => 'erro', 'mensagem' => 'Erro ao excluir: ' . $e->getMessage()], 500);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'erro', 'mensagem' => 'Erro ao excluir perfil: ' . $e->getMessage()]);
         }
     }
-
-    public function lista()
+    public function home()
     {
         session_start();
-
-        if (!isset($_SESSION['usuario'])) {
-            header("Location: /ACADEMY/public/");
-            exit;
-        }
-
-        $usuarioModel = new UsuarioModel();
-        $treinoModel = new TreinoModel();
-
-        $usuarios = $usuarioModel->getAll();
-
-        foreach ($usuarios as &$usuario) {
-            $usuario['treinos'] = $treinoModel->getTreinosRealizadosByUsuario($usuario['id']);
-        }
-
-        include __DIR__ . "/../views/usuario/lista.php";
+        // Redireciona para a home pública
+        header('Location: /ACADEMY/public');
+        exit;
     }
 
-    public function excluir()
-    {
-        session_start();
-        if (!isset($_POST['id'])) {
-            echo json_encode(["status" => "erro", "mensagem" => "Usuário não informado!"]);
-            exit;
-        }
-
-        $usuarioModel = new UsuarioModel();
-        $usuarioModel->delete($_POST['id']);
-
-        echo json_encode(["status" => "sucesso", "mensagem" => "Usuário excluído com sucesso!"]);
-    }
-
-    public function editar()
-    {
-        session_start();
-        if (!isset($_POST['id'], $_POST['nome'], $_POST['email'])) {
-            echo json_encode(["status" => "erro", "mensagem" => "Dados incompletos!"]);
-            exit;
-        }
-
-        $usuarioModel = new UsuarioModel();
-        $usuarioModel->update($_POST['id'], $_POST['nome'], $_POST['email']);
-
-        echo json_encode(["status" => "sucesso", "mensagem" => "Usuário atualizado com sucesso!"]);
-    }
 }
-
-

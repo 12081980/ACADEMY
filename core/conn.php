@@ -1,4 +1,5 @@
 <?php
+// core/conn.php
 $host = 'localhost';
 $db = 'academy';
 $user = 'root';

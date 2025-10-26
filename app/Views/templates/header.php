@@ -1,22 +1,13 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-   <base href="/ACADEMY/">
-<link rel="stylesheet" href="public/css/style.css">
-
-
-   
+    <base href="/ACADEMY/">
+    <link rel="stylesheet" href="public/css/style.css">
 </head>
-<body>  
- <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-?>
-
+<body>
 <?php
-if (session_status() !== PHP_SESSION_ACTIVE) {
+if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 ?>
@@ -28,23 +19,33 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
                 <li><a href="/ACADEMY/public/home">Início</a></li>
 
                 <?php if (isset($_SESSION['usuario'])): ?>
-                    <li><a href="/ACADEMY/public/treinos/realizados">📋 Treinos Realizados</a></li>
-                    <li><a href="/ACADEMY/public/treinos/em_andamento">Treinos em Andamento</a></li>
-                    <li><a href="/ACADEMY/public/treinos/graficos">📊 Ver gráfico de evolução</a></li>
+                    <li><a href="/ACADEMY/public/treinos/realizados">📋 TREINOS REALIZADOS</a></li>
+                    <li><a href="/ACADEMY/public/treinos/em_andamento">📊 TREINOS EM ANDAMENTO</a></li>
+                    <li><a href="/ACADEMY/public/treinos/graficos">📊 GRÁFICO DE EVOLUÇÃO</a></li>
+                <?php endif; ?>
+
+                <!-- Link de Notificações só aparece se houver notificações -->
+                <?php if (isset($_SESSION['usuario']) && !empty($notificacoes) && is_array($notificacoes)): ?>
+                    <li>
+                        <a href="/ACADEMY/public/notificacoes">
+                            NOTIFICAÇÕES (<?= count($notificacoes) ?>)
+                        </a>
+                    </li>
+                <?php endif; ?>
+
+                <?php if (isset($_SESSION['usuario']) && $_SESSION['usuario']['tipo'] === 'usuario'): ?>
+                    <li><a href="/ACADEMY/public/treinos/recebidos">Treinos Recebidos</a></li>
                 <?php endif; ?>
 
                 <li>
                     <div class="botoes">
-<?php if (isset($_SESSION['usuario'])): ?>
-    <span>
-        <span style="color: #fff; font-weight: bold;">
-                                👋 Olá, <a href="/ACADEMY/public/usuario/perfil"><?= htmlspecialchars($_SESSION['usuario']['nome']) ?></a>
-    </span>
-    </span>
+                        <?php if (isset($_SESSION['usuario'])): ?>
+                            <span style="color: #fff; font-weight: bold;">
+                                👋 Olá, <a href="/ACADEMY/public/usuario/perfil"><?= htmlspecialchars($_SESSION['usuario']['nome'] ?? '') ?></a>
+                            </span>
                             <form action="/ACADEMY/public/auth/logout" method="post" style="display: inline;">
-    <button type="submit">Sair</button>
-</form>
-
+                                <button type="submit">Sair</button>
+                            </form>
                         <?php else: ?>
                             <button onclick="abrirModal('modalLogin')">Login</button>
                             <button onclick="abrirModal('modalCadastro')">Cadastro</button>
@@ -55,46 +56,89 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
         </nav>
     </div>
 </header>
+
 <main>
 <div class="containerBody">
     <!-- Modal Login -->
-<div id="modalLogin" class="modal">
-  <div class="modal-content">
-    <button class="close-btn" onclick="fecharModal('modalLogin')">&times;</button>
-    <h2>Login</h2>
-    <form id="formLogin" onsubmit="return validarLogin()">
-      <label for="emailLogin">Email:</label>
-      <input type="email" id="emailLogin" name="email" required>
+    <div id="modalLogin" class="modal">
+      <div class="modal-content">
+        <button class="close-btn" onclick="fecharModal('modalLogin')">&times;</button>
+        <h2>Login</h2>
+        <form id="formLogin" method="POST" action="/ACADEMY/public/auth/login">
+            <label for="emailLogin">Email:</label>
+            <input type="email" id="emailLogin" name="email" required>
 
-      <label for="senhaLogin">Senha:</label>
-      <input type="password" id="senhaLogin" name="senha" required>
+            <label for="senhaLogin">Senha:</label>
+            <input type="password" id="senhaLogin" name="senha" required>
 
-      <button type="submit">Entrar</button>
-    </form>
-    <div id="loginErro" style="color: red; margin-top: 10px;"></div>
-  </div>
-</div>
+            <button type="submit">Entrar</button>
+        </form>
 
-<!-- Modal Cadastro -->
-<div id="modalCadastro" class="modal">
-  <div class="modal-content">
-    <button class="close-btn" onclick="fecharModal('modalCadastro')">&times;</button>
-    <h2>Cadastro</h2>
-    <form id="formCadastro" onsubmit="return validarCadastro()">
-      <label for="nomeCadastro">Nome:</label>
-      <input type="text" id="nomeCadastro" name="nome" required>
+        <?php if (!empty($_SESSION['erro_login'])): ?>
+          <div style="color:red; margin-top:10px;">
+            <?= $_SESSION['erro_login']; unset($_SESSION['erro_login']); ?>
+          </div>
+        <?php endif; ?>
+      </div>
+    </div>
 
-      <label for="emailCadastro">Email:</label>
-      <input type="email" id="emailCadastro" name="email" required>
+    <!-- Modal Cadastro -->
+    <div id="modalCadastro" class="modal">
+      <div class="modal-content">
+        <span class="fechar" onclick="fecharModal('modalCadastro')">&times;</span>        
+        <form id="formCadastro" method="POST" action="/ACADEMY/public/register">
+            <label for="nome">Nome:</label>
+            <input type="text" id="nome" name="nome" required>
 
-      <label for="senhaCadastro">Senha:</label>
-      <input type="password" id="senhaCadastro" name="senha" required>
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
 
-      <button type="submit">Cadastrar</button>
-    </form>
-    <div id="cadastroErro" style="color: red; margin-top: 10px;"></div>
-  </div>
-</div>
+            <label for="senha">Senha:</label>
+            <input type="password" id="senha" name="senha" required>
 
+            <label for="telefone">Telefone:</label>
+            <input type="text" id="telefone" name="telefone">
 
+            <label for="data_nascimento">Data de Nascimento:</label>
+            <input type="date" id="data_nascimento" name="data_nascimento">
+
+            <label for="endereco">Endereço:</label>
+            <input type="text" id="endereco" name="endereco">
+
+            <label for="plano">Plano:</label>
+            <select id="plano" name="plano">
+                <option value="">Selecione</option>
+                <option value="mensal">Mensal</option>
+                <option value="trimestral">Trimestral</option>
+                <option value="anual">Anual</option>
+            </select>
+
+            <label for="objetivo">Objetivo:</label>
+            <input type="text" id="objetivo" name="objetivo">
+
+            <label for="genero">Gênero:</label>
+            <select id="genero" name="genero">
+                <option value="">Selecione</option>
+                <option value="masculino">Masculino</option>
+                <option value="feminino">Feminino</option>
+                <option value="outro">Outro</option>
+            </select>
+
+            <input type="hidden" name="tipo" value="aluno">
+            <button type="submit">Cadastrar</button>
+        </form>
+
+        <?php if (!empty($_SESSION['erro_cadastro'])): ?>
+          <div style="color:red; margin-top:10px;">
+            <?= $_SESSION['erro_cadastro']; unset($_SESSION['erro_cadastro']); ?>
+          </div>
+        <?php endif; ?>
+      </div>
+    </div>
+
+<script>
+  // Abrir/fechar modais
+  function abrirModal(id) { document.getElementById(id)?.classList.add('open'); }
+  function fecharModal(id) { document.getElementById(id)?.classList.remove('open'); }
+</script>
 

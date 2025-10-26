@@ -1,57 +1,120 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+// ====== AUTOLOAD DAS DEPENDÊNCIAS BÁSICAS ======
+require_once __DIR__ . '/../core/conn.php';
 require_once __DIR__ . '/../core/Router.php';
-require_once __DIR__ . '/../app/Controllers/TreinosController.php';
-$router = new Router();
+
+// ====== INSTÂNCIA DO ROUTER ======
+$router = new Router($conn);
+
+// ==================================================
+// ✅ ROTAS PRINCIPAIS DO SISTEMA
+// ==================================================
 $router->addRoute('/', 'HomeController@index');
 $router->addRoute('/home', 'HomeController@index');
-$router->addRoute('/iniciar/iniciar', 'IniciarController@iniciar');
-$router->addRoute('/treinos/realizados', 'TreinosController@realizados');
-$router->addRoute('/treinos/iniciar', 'TreinosController@iniciar');
-$router->addRoute('/treinos/em-andamento', 'TreinosController@emAndamento');
-$router->addRoute('/auth/login', 'AuthController@login');
-$router->addRoute('/auth/cadastro', 'AuthController@cadastro');
-$router->addRoute('/treinos/em_andamento', 'TreinosController@em_andamento');
+
+// ==================================================
+// ✅ AUTENTICAÇÃO
+// ==================================================
+$router->addRoute('/login', 'AuthController@login', ['GET', 'POST']);
+$router->addRoute('/auth/login', 'AuthController@login', ['GET', 'POST']);
+$router->addRoute('/auth/register', 'AuthController@register', ['GET']);
+$router->addRoute('/auth/cadastro', 'AuthController@cadastro', ['GET', 'POST']);
+$router->addRoute('/auth/logout', 'AuthController@logout', ['GET', 'POST']);
+// ==================================================
+// ✅ NOTIFICAÇÕES
+$router->addRoute('/notificacoes', 'NotificacoesController@index');
+$router->addRoute('/instrutor/treinos_enviados', 'InstrutorController@treinos_enviados');
+$router->addRoute('/instrutor/editar_treino', 'InstrutorController@editar_treino');
+$router->addRoute('/instrutor/atualizar_treino', 'InstrutorController@atualizar_treino');
+$router->addRoute('/instrutor/excluir_treino', 'InstrutorController@excluir_treino');
+$router->addRoute('/instrutor/treinos_enviados', 'InstrutorController@treinos_enviados');
+$router->addRoute('/instrutor/editar_treino', 'InstrutorController@editar_treino');
+$router->addRoute('/instrutor/atualizar_treino', 'InstrutorController@atualizar_treino');
+$router->addRoute('/instrutor/excluir_treino', 'InstrutorController@excluir_treino');
+
+$router->addRoute('/notificacoes/ver', 'NotificacaoController@ver');
+
+// ==================================================
+// ✅ TREINOS
+// ==================================================
+$router->addRoute('/treinos/iniciar', 'TreinosController@iniciar', ['POST']);
+$router->addRoute('/treinos/em_andamento', 'TreinosController@em_andamento', ['GET']);
 $router->addRoute('/treinos/finalizar', 'TreinosController@finalizar', ['POST']);
-$router->addRoute('/treinos/graficos', 'TreinosController@graficos');
-$router->addRoute('/treino/em_andamento', 'TreinosController@emAndamento');
-$router->addRoute('/em_andamento', 'TreinosController@emAndamento');
-$router->addRoute('/login', 'AuthController@login');
-$router->addRoute('/auth/logout', 'AuthController@logout');
-$router->addRoute('/auth/cadastro', 'AuthController@cadastro');
-$router->addRoute('/admin/usuario', 'AdminController@lista_usuario');
-$router->addRoute('/admin/usuario/{id}', 'AdminController@detalhesUsuario');
-$router->addRoute('/admin/usuario', 'AdminController@listausuario');
-$router->addRoute('/admin/ver_usuario/{id}', 'AdminController@verUsuario');
-$router->addRoute('/admin/excluir_usuario/{id}', 'AdminController@excluirUsuario');
-$router->addRoute('/admin/lista_usuario', 'AdminController@listaUsuario');
-$router->addRoute('/admin/login', 'AdminController@login');
-$router->addRoute('/admin/treinos', 'AdminController@treinos');
-$router->addRoute('/login/autenticar', 'LoginController@autenticar');
-$router->addRoute('/login/autenticar', 'LoginController@autenticar');
-$router->addRoute('/admin/usuario', 'AdminController@listausuario');
+$router->addRoute('/treinos/realizados', 'TreinosController@realizados', ['GET']);
+$router->addRoute('/treinos/graficos', 'TreinosController@graficos', ['GET']);
 
-$router->addRoute('/register', 'RegisterController@register');
-$router->addRoute('/register', 'AuthController@register');
-$router->addRoute('/admin/lista_usuario', 'AdminController@listaUsuario');
+// Alias para compatibilidade
+$router->addRoute('/treinos/em_andamento', 'TreinosController@em_andamento', ['GET', 'POST']);
 
-$router->addRoute('/usuario/perfil', 'UsuarioController@perfil');
-$router->addRoute('/usuario/atualizar', 'UsuarioController@atualizar');
-$router->addRoute('/usuario/excluirTreino/{id}', 'UsuarioController@excluirTreino');
-$router->addRoute('/usuario/excluirPerfil', 'UsuarioController@excluirPerfil');
+// Exibir o formulário de edição (GET)
+$router->addRoute('/admin/editar_usuario/{id}', 'AdminController@editarUsuario', 'GET');
 
+// Salvar alterações (POST)
+$router->addRoute('/admin/editar_usuario/{id}', 'AdminController@atualizarUsuario', 'POST');
+$router->addRoute('/admin/editar_usuario/{id}', 'AdminController@editarUsuario');
+$router->addRoute('/admin/editar_usuario/{id}', 'AdminController@atualizarUsuario');
 
+// ==================================================
+// ✅ ADMINISTRAÇÃO
+// ==================================================
+$router->addRoute('/admin/login', 'AdminController@login', ['GET', 'POST']);
+$router->addRoute('/admin/treinos', 'AdminController@treinos', ['GET']);
+$router->addRoute(
+    '/admin/usuario',
+    'AdminController@listaUsuario',
+    ['GET']
+);
+$router->addRoute('/admin/lista_usuario', 'AdminController@listaUsuarios', ['GET']);
+$router->addRoute('/admin/dashboard', 'AdminController@dashboard', ['GET']);
 
-// $controller = new $controllerName($GLOBALS['conn']);
+$router->addRoute('/admin/ver_usuario/{id}', 'AdminController@verUsuario', ['GET']);
+$router->addRoute('/admin/excluir_usuario/{id}', 'AdminController@excluirUsuario', ['POST']);
 
+// ==================================================
+// ✅ USUÁRIO
+// ==================================================
+$router->addRoute('/usuario/perfil', 'UsuarioController@perfil', ['GET']);
+$router->addRoute('/usuario/atualizar', 'UsuarioController@atualizar', ['POST']);
+$router->addRoute('/usuario/excluir-perfil', 'UsuarioController@excluirPerfil', ['POST']);
+$router->addRoute('/usuario/excluirTreino/{id}', 'UsuarioController@excluirTreino', ['POST']);
+$router->addRoute('/usuario/excluir', 'UsuarioController@excluir', ['POST']);
+$router->addRoute('/usuario/lista', 'UsuarioController@lista', ['GET']);
+$router->addRoute('/usuario/editar', 'UsuarioController@editar', ['GET', 'POST']);
+$router->addRoute('/usuario/home', 'UsuarioController@home', ['GET']);
+$router->addRoute('/usuario/alterarSenha', 'UsuarioController@alterarSenha', ['POST']);
 
+// ✅ Rotas do Instrutor (corrigidas)
+$router->addRoute('/instrutor/dashboardInstrutor', 'InstrutorController@dashboard', ['GET']);
+$router->addRoute('/instrutor/enviar', 'InstrutorController@enviarTreinoForm', ['GET']);
+$router->addRoute('/instrutor/enviar_treino', 'InstrutorController@enviarTreino', ['POST']);
+$router->addRoute('/treinos/recebidos', 'TreinoController@recebidos', ['GET']);
 
-// Pega URL sem base path
+$router->addRoute('/instrutor/enviar_treino', 'InstrutorController@enviarTreinoForm', ['GET']);
+$router->addRoute('/instrutor/enviar_treino', 'InstrutorController@enviarTreino', ['POST']);
+
+// ==================================================
+// ✅ REGISTRO
+// ==================================================
+$router->addRoute('/register', 'AuthController@register', ['GET', 'POST']);
+// pseudo-exemplo: ajuste conforme seu Router
+$router->addRoute('/instrutor/enviar', 'InstrutorController@enviarTreinoForm', ['GET']);
+$router->addRoute('/instrutor/enviar_treino', 'InstrutorController@enviarTreino', ['POST']);
+
+// ==================================================
+// ✅ ROTA FINAL: DESPACHA A REQUISIÇÃO
+// ==================================================
 $url = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
-// REMOVE /ACADEMY/public
+// Remove o prefixo "/ACADEMY/public" das URLs
 $basePath = '/ACADEMY/public';
 if (strpos($url, $basePath) === 0) {
     $url = substr($url, strlen($basePath));
 }
 
+
+// Executa a rota correspondente
 $router->dispatch($url);

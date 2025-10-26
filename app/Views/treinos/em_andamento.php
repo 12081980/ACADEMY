@@ -1,45 +1,42 @@
-<?php
+<?php include __DIR__ . '/../templates/header.php'; ?>
 
+<div class="container">
+    <h2>Treino em Andamento</h2>
 
-$usuario = $_SESSION['usuario']['nome'] ?? 'Usuário';
-$treino = $_SESSION['treino_em_andamento'] ?? null;
-?>
-<?php
-include __DIR__ . '/../../Views/templates/header.php';
-?>
-<h1>Treino em Andamento</h1>
+    <?php if (isset($treino) && $treino): ?>
+        <div class="card">
+            <h3><?= htmlspecialchars($treino['nome']); ?></h3>
+            <p><strong>Iniciado em:</strong> <?= date('d/m/Y H:i', strtotime($treino['data_inicio'])); ?></p>
+            <p><strong>Status:</strong> <?= htmlspecialchars($treino['status']); ?></p>
 
-<!-- <p><strong>Usuário:</strong> <?= htmlspecialchars($usuario) ?></p> -->
+            <button id="finalizarTreino" class="btn btn-danger">Finalizar Treino</button>
+        </div>
+    <?php else: ?>
+        <p>Nenhum treino em andamento.</p>
+    <?php endif; ?>
+</div>
 
-<?php if ($treino): ?>
-    <p><strong>Nome do Treino:</strong> <?= htmlspecialchars($treino['nome']) ?></p>
-    <p><strong>Início:</strong> <?= date('d/m/Y H:i:s', strtotime($treino['inicio'])) ?></p>
+<script>
+    document.getElementById('finalizarTreino')?.addEventListener('click', () => {
+        if (confirm('Tem certeza que deseja finalizar este treino?')) {
+            fetch('/ACADEMY/public/treinos/finalizar', {
+                method: 'POST'
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'sucesso') {
+                        alert(data.mensagem);
+                        window.location.href = data.redirect; // ✅ Redireciona corretamente
+                    } else {
+                        alert(data.mensagem);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao finalizar treino:', error);
+                    alert('Erro ao finalizar o treino.');
+                });
+        }
+    });
+</script>
 
-    <h3>Exercícios:</h3>
-    <ul>
-        <?php foreach ($treino['exercicios'] as $exercicio): ?>
-            <li>
-                <?= htmlspecialchars($exercicio['nome']) ?> -
-                <?= htmlspecialchars($exercicio['series']) ?> séries de
-                <?= htmlspecialchars($exercicio['repeticoes']) ?> reps
-                <?= isset($exercicio['peso']) ? '- ' . htmlspecialchars($exercicio['peso']) . ' kg' : '' ?>
-            </li>
-        <?php endforeach; ?>
-    </ul>
-
-    <form method="post" action="/ACADEMY/public/treinos/finalizar">
-        <button type="submit">Finalizar Treino</button>
-    </form>
-
-    <br>
-    <a href="/ACADEMY/public/home">
-        <button type="button">Voltar</button>
-    </a>
-
-<?php else: ?>
-    <p>Nenhum treino em andamento.</p>
-<?php endif; ?>
-
-<?php
-include __DIR__ . '/../../Views/templates/footer.php';
-?>
+<?php include __DIR__ . '/../templates/footer.php'; ?>
