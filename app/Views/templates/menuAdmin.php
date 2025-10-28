@@ -7,8 +7,6 @@
    
 </head>
 <body>
-
-
  <header>
     <div class="container">        
         <nav>
@@ -26,5 +24,5 @@
             </ul>
         </nav>
     </header>
-    <main>
-<div class="containerBody">
+    <main class="mainAdmin">
+<div class="dashboard-container">

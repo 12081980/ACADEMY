@@ -1,7 +1,7 @@
 
   </div>
     </main>
-   <footer class="footer">
+   <footer class="footerAdmin">
         &copy; 2025 E@Silva. Todos os direitos reservados.
     </footer>
 </body>

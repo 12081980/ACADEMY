@@ -981,3 +981,23 @@ header.dashboard-header nav button {
     text-decoration: underline;
 }
 
+.dashboard-container {
+    max-width: 1200px;
+    height: 70vh;
+    margin: 30px auto;
+    padding: 20px;
+}
+.mainAdmin {
+    flex: 1;
+    /* padding: 20px; */
+}
+
+.footerAdmin {
+    background:#007BFF; /* cor de fundo */
+    color: #fff;      /* cor do texto */
+    text-align: center; /* centraliza o texto */
+    padding: 23px 0;    /* espaçamento interno */
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
