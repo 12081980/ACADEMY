@@ -2,7 +2,7 @@
 class UsuarioModel
 {
     private $conn;
-    private $table = 'usuario'; // nome da tabela no seu banco
+    private $table = 'usuario'; // nome da tabela no banco
 
     public function __construct($conn)
     {
@@ -36,11 +36,11 @@ class UsuarioModel
     public function create($data)
     {
         $stmt = $this->conn->prepare("
-            INSERT INTO {$this->table} 
-            (nome, email, senha, telefone, data_nascimento, genero, plano, objetivo, endereco, tipo)
-            VALUES 
-            (:nome, :email, :senha, :telefone, :data_nascimento, :genero, :plano, :objetivo, :endereco, :tipo)
-        ");
+        INSERT INTO {$this->table} 
+        (nome, email, senha, telefone, cidade, estado, bairro, rua, numero, tipo)
+        VALUES 
+        (:nome, :email, :senha, :telefone, :cidade, :estado, :bairro, :rua, :numero, :tipo)
+    ");
 
         $senhaHash = password_hash($data['senha'], PASSWORD_DEFAULT);
 
@@ -49,12 +49,12 @@ class UsuarioModel
             ':email' => $data['email'],
             ':senha' => $senhaHash,
             ':telefone' => $data['telefone'] ?? null,
-            ':data_nascimento' => $data['data_nascimento'] ?? null,
-            ':genero' => $data['genero'] ?? null,
-            ':plano' => $data['plano'] ?? null,
-            ':objetivo' => $data['objetivo'] ?? null,
-            ':endereco' => $data['endereco'] ?? null,
-            ':tipo' => $data['tipo'] ?? 'usuario'
+            ':cidade' => $data['cidade'] ?? null,
+            ':estado' => $data['estado'] ?? null,
+            ':bairro' => $data['bairro'] ?? null,
+            ':rua' => $data['rua'] ?? null,
+            ':numero' => $data['numero'] ?? null,
+            ':tipo' => $data['tipo'] ?? 'aluno'
         ]);
     }
 
@@ -64,17 +64,17 @@ class UsuarioModel
     public function update($id, $data)
     {
         $sql = "
-            UPDATE {$this->table}
-            SET nome = :nome,
-                email = :email,
-                telefone = :telefone,
-                data_nascimento = :data_nascimento,
-                genero = :genero,
-                plano = :plano,
-                objetivo = :objetivo,
-                endereco = :endereco,
-                tipo = :tipo
-        ";
+        UPDATE {$this->table}
+        SET nome = :nome,
+            email = :email,
+            telefone = :telefone,
+            cidade = :cidade,
+            estado = :estado,
+            bairro = :bairro,
+            rua = :rua,
+            numero = :numero,
+            tipo = :tipo
+    ";
 
         if (!empty($data['senha'])) {
             $sql .= ", senha = :senha";
@@ -89,12 +89,12 @@ class UsuarioModel
             ':nome' => $data['nome'],
             ':email' => $data['email'],
             ':telefone' => $data['telefone'] ?? null,
-            ':data_nascimento' => $data['data_nascimento'] ?? null,
-            ':genero' => $data['genero'] ?? null,
-            ':plano' => $data['plano'] ?? null,
-            ':objetivo' => $data['objetivo'] ?? null,
-            ':endereco' => $data['endereco'] ?? null,
-            ':tipo' => $data['tipo'] ?? 'usuario'
+            ':cidade' => $data['cidade'] ?? null,
+            ':estado' => $data['estado'] ?? null,
+            ':bairro' => $data['bairro'] ?? null,
+            ':rua' => $data['rua'] ?? null,
+            ':numero' => $data['numero'] ?? null,
+            ':tipo' => $data['tipo'] ?? 'aluno'
         ];
 
         if (!empty($data['senha'])) {
@@ -138,27 +138,27 @@ class UsuarioModel
         $stmt->execute([':email' => $email]);
         return $stmt->fetch(PDO::FETCH_ASSOC) !== false;
     }
+
     public function listarUsuarios()
     {
-        $sql = "SELECT id, nome, email FROM usuario WHERE tipo = 'usuario'";
+        $sql = "SELECT id, nome, email FROM {$this->table} WHERE tipo = 'usuario'";
         $stmt = $this->conn->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
     public function buscarTodosUsuarios()
     {
-        $sql = "SELECT id, nome, email FROM usuario WHERE tipo = ''";
+        $sql = "SELECT id, nome, email FROM {$this->table} WHERE tipo = ''";
         $stmt = $this->conn->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
     public function listarTodos()
     {
-        $stmt = $this->conn->prepare("SELECT id, nome, email, tipo FROM usuario ORDER BY nome ASC");
+        $stmt = $this->conn->prepare("SELECT id, nome, email, tipo FROM {$this->table} ORDER BY nome ASC");
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-
 }
-
-

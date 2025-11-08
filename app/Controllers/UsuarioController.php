@@ -42,86 +42,43 @@ class UsuarioController
         header('Content-Type: application/json');
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            echo json_encode(['status' => 'erro', 'mensagem' => 'Método não permitido.']);
+            echo json_encode(['status' => 'erro', 'mensagem' => 'Método inválido']);
             exit;
         }
 
-        if (!isset($_SESSION['usuario']['id'])) {
-            echo json_encode(['status' => 'erro', 'mensagem' => 'Usuário não autenticado.']);
-            exit;
-        }
-
-        $usuarioId = $_SESSION['usuario']['id'];
-
-        $nome = trim($_POST['nome'] ?? '');
-        $email = trim($_POST['email'] ?? '');
-        $senha = $_POST['senha'] ?? '';
-        $telefone = trim($_POST['telefone'] ?? null);
-        $data_nascimento = $_POST['data_nascimento'] ?? null;
-        $endereco = trim($_POST['endereco'] ?? null);
-        $plano = $_POST['plano'] ?? null;
-        $objetivo = trim($_POST['objetivo'] ?? null);
-        $genero = $_POST['genero'] ?? null;
-
-        if (!$nome || !$email) {
-            echo json_encode(['status' => 'erro', 'mensagem' => 'Preencha os campos obrigatórios!']);
-            exit;
-        }
-
-        $query = "UPDATE usuario SET 
-            nome = :nome, 
-            email = :email, 
-            telefone = :telefone, 
-            data_nascimento = :data_nascimento, 
-            endereco = :endereco, 
-            plano = :plano, 
-            objetivo = :objetivo, 
-            genero = :genero";
-
-        $params = [
-            ':nome' => $nome,
-            ':email' => $email,
-            ':telefone' => $telefone,
-            ':data_nascimento' => $data_nascimento,
-            ':endereco' => $endereco,
-            ':plano' => $plano,
-            ':objetivo' => $objetivo,
-            ':genero' => $genero,
-            ':id' => $usuarioId
+        $id = $_SESSION['usuario']['id'];
+        $dados = [
+            'nome' => trim($_POST['nome'] ?? ''),
+            'email' => trim($_POST['email'] ?? ''),
+            'senha' => $_POST['senha'] ?? '',
+            'telefone' => trim($_POST['telefone'] ?? ''),
+            'cidade' => trim($_POST['cidade'] ?? ''),
+            'estado' => trim($_POST['estado'] ?? ''),
+            'bairro' => trim($_POST['bairro'] ?? ''),
+            'rua' => trim($_POST['rua'] ?? ''),
+            'numero' => trim($_POST['numero'] ?? ''),
+            'tipo' => $_SESSION['usuario']['tipo'] ?? 'aluno'
         ];
 
-        if (!empty($senha)) {
-            $query .= ", senha = :senha";
-            $params[':senha'] = password_hash($senha, PASSWORD_DEFAULT);
+        if (!$dados['nome'] || !$dados['email']) {
+            echo json_encode(['status' => 'erro', 'mensagem' => 'Campos obrigatórios não preenchidos.']);
+            exit;
         }
 
-        $query .= " WHERE id = :id";
+        $model = new UsuarioModel($this->conn);
 
-        try {
-            $stmt = $this->conn->prepare($query);
-            if ($stmt->execute($params)) {
-                $_SESSION['usuario'] = array_merge($_SESSION['usuario'], [
-                    'nome' => $nome,
-                    'email' => $email,
-                    'telefone' => $telefone,
-                    'data_nascimento' => $data_nascimento,
-                    'endereco' => $endereco,
-                    'plano' => $plano,
-                    'objetivo' => $objetivo,
-                    'genero' => $genero
-                ]);
-
-                echo json_encode([
-                    'status' => 'sucesso',
-                    'mensagem' => 'Perfil atualizado com sucesso!',
-                    'redirect' => '/ACADEMY/public/usuario/perfil'
-                ]);
-            } else {
-                echo json_encode(['status' => 'erro', 'mensagem' => 'Erro ao atualizar perfil.']);
-            }
-        } catch (Exception $e) {
-            echo json_encode(['status' => 'erro', 'mensagem' => 'Erro: ' . $e->getMessage()]);
+        if ($model->update($id, $dados)) {
+            // Atualiza sessão
+            $_SESSION['usuario'] = array_merge($_SESSION['usuario'], $dados);
+            echo json_encode([
+                'status' => 'sucesso',
+                'mensagem' => 'Perfil atualizado com sucesso!',
+                'redirect' => '/ACADEMY/public/usuario/perfil'
+            ]);
+        } else {
+            echo json_encode(['status' => 'erro', 'mensagem' => 'Falha ao atualizar o perfil.']);
         }
+        exit;
     }
 
     public function excluirPerfil()

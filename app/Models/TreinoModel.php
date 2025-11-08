@@ -25,8 +25,6 @@ class TreinoModel
         return $this->conn->lastInsertId();
     }
 
-
-
     public function getTreinoEmAndamento($usuarioId)
     {
         $stmt = $this->conn->prepare("
@@ -48,51 +46,6 @@ class TreinoModel
         return $stmt->execute([':id' => $treinoId]);
     }
 
-    public function getTreinosFinalizadosPaginados($usuarioId, $limite, $offset)
-    {
-        // Pega os treinos finalizados com limite e offset
-        $sql = "
-        SELECT 
-            t.id,
-            t.nome,
-            t.tipo,
-            t.data_treino,
-            t.data_inicio,
-            t.data_fim
-        FROM treino t
-        WHERE t.usuario_id = ? AND t.status = 'finalizado'
-        ORDER BY t.data_fim DESC
-        LIMIT ? OFFSET ?
-    ";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->bindValue(1, $usuarioId, PDO::PARAM_INT);
-        $stmt->bindValue(2, $limite, PDO::PARAM_INT);
-        $stmt->bindValue(3, $offset, PDO::PARAM_INT);
-        $stmt->execute();
-
-        $treinos = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        // Busca os exercícios de cada treino
-        foreach ($treinos as &$treino) {
-            $sqlEx = "
-            SELECT 
-                e.nome AS exercicio_nome,
-                te.series,
-                te.repeticoes,
-                te.carga
-            FROM treino_exercicio te
-            INNER JOIN exercicio e ON e.id = te.exercicio_id
-            WHERE te.treino_id = ?
-        ";
-            $stmtEx = $this->conn->prepare($sqlEx);
-            $stmtEx->execute([$treino['id']]);
-            $treino['exercicios'] = $stmtEx->fetchAll(PDO::FETCH_ASSOC);
-        }
-
-        return $treinos;
-    }
-
-
     public function getTreinosFinalizados($usuarioId, $limit = null, $offset = null)
     {
         $sql = "SELECT * FROM treino WHERE usuario_id = ? AND status = 'finalizado' ORDER BY data_inicio DESC";
@@ -103,148 +56,104 @@ class TreinoModel
         $stmt->execute([$usuarioId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
     public function contarTreinosFinalizados($usuarioId)
     {
-        $stmt = $this->conn->prepare("SELECT COUNT(*) FROM treino WHERE usuario_id = ? AND status = 'finalizado'");
+        $stmt = $this->conn->prepare("SELECT COUNT(*) FROM treino WHERE usuario_id = ?");
         $stmt->execute([$usuarioId]);
         return (int) $stmt->fetchColumn();
     }
+
     public function adicionarExercicioAoTreino($treinoId, $ex)
     {
-        // Primeiro, tenta buscar o id do exercício pelo nome
+        // Busca ou cria o exercício
         $stmt = $this->conn->prepare("SELECT id FROM exercicio WHERE nome = ?");
         $stmt->execute([$ex['nome']]);
         $exercicio = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if (!$exercicio) {
-            // Se não existir, opcional: criar exercício novo
-            $stmtIns = $this->conn->prepare("INSERT INTO exercicio (nome) VALUES (?)");
-            $stmtIns->execute([$ex['nome']]);
+            $stmtIns = $this->conn->prepare("INSERT INTO exercicio (nome, grupo_muscular) VALUES (?, ?)");
+            $stmtIns->execute([$ex['nome'], $ex['grupo_muscular'] ?? null]);
             $exercicioId = $this->conn->lastInsertId();
         } else {
             $exercicioId = $exercicio['id'];
         }
 
-        // Inserir na tabela treino_exercicio
+        // Insere na tabela treino_exercicio
         $stmtInsert = $this->conn->prepare("
-        INSERT INTO treino_exercicio (treino_id, exercicio_id, series, repeticoes, carga)
-        VALUES (?, ?, ?, ?, ?)
-    ");
+            INSERT INTO treino_exercicio (treino_id, nome_exercicio, series, repeticoes, carga)
+            VALUES (?, ?, ?, ?, ?)
+        ");
         $stmtInsert->execute([
             $treinoId,
-            $exercicioId,
+            $ex['nome'],
             $ex['series'],
             $ex['repeticoes'],
             $ex['carga']
         ]);
     }
-    public function listarPorUsuario($usuario_id)
-    {
-        $sql = "SELECT titulo, descricao, data_criacao 
-            FROM treinos 
-            WHERE usuario_id = ? 
-            ORDER BY data_criacao DESC";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->execute([$usuario_id]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-    public function salvarTreino($usuario_id, $instrutor_id, $exercicios)
-    {
-        try {
-            $this->conn->beginTransaction();
-
-            // Insere o treino principal
-            $sql = "INSERT INTO treinos (usuario_id, instrutor_id, data_envio) VALUES (?, ?, NOW())";
-            $stmt = $this->conn->prepare($sql);
-            $stmt->execute([$usuario_id, $instrutor_id]);
-
-            $treino_id = $this->conn->lastInsertId();
-
-            // Insere cada exercício
-            $sqlEx = "INSERT INTO exercicios_treino (treino_id, nome, series, repeticoes, carga) VALUES (?, ?, ?, ?, ?)";
-            $stmtEx = $this->conn->prepare($sqlEx);
-
-            foreach ($exercicios as $ex) {
-                $stmtEx->execute([
-                    $treino_id,
-                    $ex['nome'],
-                    $ex['series'],
-                    $ex['repeticoes'],
-                    $ex['carga']
-                ]);
-            }
-
-            $this->conn->commit();
-            return true;
-        } catch (Exception $e) {
-            $this->conn->rollBack();
-            error_log("Erro ao salvar treino: " . $e->getMessage());
-            return false;
-        }
-    }
-    public function getTreinosEnviadosPorInstrutor($instrutorId)
-    {
-        $sql = "SELECT t.id, t.tipo, t.data_envio, u.nome AS aluno_nome, u.email
-            FROM treinos t
-            JOIN usuarios u ON u.id = t.usuario_id
-            WHERE t.instrutor_id = :instrutor_id
-            ORDER BY t.data_envio DESC";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->bindValue(':instrutor_id', $instrutorId);
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-
-
-    public function getTreinoPorId($id)
-    {
-        $sql = "SELECT * FROM treinos WHERE id = :id";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->bindValue(':id', $id);
-        $stmt->execute();
-        return $stmt->fetch(PDO::FETCH_ASSOC);
-    }
-
-    public function atualizarTreino($id, $tipo)
-    {
-        $sql = "UPDATE treinos SET tipo = :tipo WHERE id = :id";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->bindValue(':tipo', $tipo);
-        $stmt->bindValue(':id', $id);
-        return $stmt->execute();
-    }
-
-    public function excluirTreino($id)
-    {
-        $sql = "DELETE FROM treinos WHERE id = :id";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->bindValue(':id', $id);
-        return $stmt->execute();
-    }
-
-
-    public function getPorId($treinoId)
-    {
-        $stmt = $this->conn->prepare("SELECT * FROM treinos WHERE id = :id");
-        $stmt->execute([':id' => $treinoId]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
-    }
 
     public function getExerciciosDoTreino($treinoId)
     {
         $stmt = $this->conn->prepare("
-        SELECT e.nome, te.series, te.repeticoes, te.carga
-        FROM treino_exercicios te
-        JOIN exercicios e ON e.id = te.exercicio_id
-        WHERE te.treino_id = :tid
-    ");
-        $stmt->execute([':tid' => $treinoId]);
+            SELECT nome_exercicio AS nome, series, repeticoes, carga
+            FROM treino_exercicio
+            WHERE treino_id = :treino_id
+        ");
+        $stmt->bindValue(':treino_id', $treinoId, PDO::PARAM_INT);
+        $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function listarTreinosPorUsuario($usuario_id)
+    {
+        $sql = "
+            SELECT 
+                t.id AS treino_id,
+                DATE_FORMAT(t.data_fim, '%d/%m/%Y') AS data_treino,
+                t.tipo AS tipo_treino,
+                COUNT(te.id) AS total_exercicios,
+                COALESCE(SUM(te.carga), 0) AS peso_total
+            FROM treino t
+            LEFT JOIN treino_exercicio te ON te.treino_id = t.id
+            WHERE t.usuario_id = :usuario_id AND t.status = 'finalizado'
+            GROUP BY t.id, t.data_fim, t.tipo
+            ORDER BY t.data_fim DESC
+        ";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(':usuario_id', $usuario_id, PDO::PARAM_INT);
+        $stmt->execute();
+        $treinos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($treinos as &$treino) {
+            $treino['exercicios'] = $this->getExerciciosDoTreino($treino['treino_id']);
+        }
+
+        return $treinos;
+    }
+    public function listarTreinosComExercicios($usuario_id)
+    {
+        $sql = "SELECT 
+                t.id AS treino_id,
+                DATE_FORMAT(t.data_treino, '%d/%m/%Y') AS data_treino,
+                t.tipo,
+                COALESCE(e.nome_exercicio, 'Nenhum exercício registrado') AS nome_exercicio,
+                COALESCE(e.series, '-') AS series,
+                COALESCE(e.repeticoes, '-') AS repeticoes,
+                COALESCE(e.carga, '-') AS carga,
+                COUNT(e.id) AS total_exercicios,
+                COALESCE(SUM(e.carga), 0) AS peso_total
+            FROM treino t
+            LEFT JOIN treino_exercicio e ON e.treino_id = t.id
+            WHERE t.usuario_id = :usuario_id
+            GROUP BY t.id, e.id
+            ORDER BY t.data_treino DESC";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(':usuario_id', $usuario_id, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
 }
-
-
-
-
-

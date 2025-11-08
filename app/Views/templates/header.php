@@ -2,7 +2,8 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <base href="/ACADEMY/">
+    <base href="/ACADEMY/public">
+
     <link rel="stylesheet" href="public/css/style.css">
 </head>
 <body>
@@ -99,30 +100,21 @@ if (session_status() === PHP_SESSION_NONE) {
             <label for="telefone">Telefone:</label>
             <input type="text" id="telefone" name="telefone">
 
-            <label for="data_nascimento">Data de Nascimento:</label>
-            <input type="date" id="data_nascimento" name="data_nascimento">
+          <label for="cidade">Cidade:</label>
+<input type="text" id="cidade" name="cidade" required>
 
-            <label for="endereco">Endereço:</label>
-            <input type="text" id="endereco" name="endereco">
+<label for="estado">Estado:</label>
+<input type="text" id="estado" name="estado" required>
 
-            <label for="plano">Plano:</label>
-            <select id="plano" name="plano">
-                <option value="">Selecione</option>
-                <option value="mensal">Mensal</option>
-                <option value="trimestral">Trimestral</option>
-                <option value="anual">Anual</option>
-            </select>
+<label for="bairro">Bairro:</label>
+<input type="text" id="bairro" name="bairro" required>
 
-            <label for="objetivo">Objetivo:</label>
-            <input type="text" id="objetivo" name="objetivo">
+<label for="rua">Rua:</label>
+<input type="text" id="rua" name="rua" required>
 
-            <label for="genero">Gênero:</label>
-            <select id="genero" name="genero">
-                <option value="">Selecione</option>
-                <option value="masculino">Masculino</option>
-                <option value="feminino">Feminino</option>
-                <option value="outro">Outro</option>
-            </select>
+<label for="numero">Número:</label>
+<input type="text" id="numero" name="numero" required>
+
 
             <input type="hidden" name="tipo" value="aluno">
             <button type="submit">Cadastrar</button>

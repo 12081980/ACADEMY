@@ -27,44 +27,30 @@ include __DIR__ . '/../../Views/templates/header.php';
                     value="<?= htmlspecialchars($_SESSION['usuario']['telefone'] ?? '') ?>">
             </div>
 
+
             <div class="form-row">
-                <label>Data de Nascimento:</label>
-                <input type="date" name="data_nascimento" value="<?= $_SESSION['usuario']['data_nascimento'] ?? '' ?>">
+                <label>Cidade:</label>
+                <input type="text" name="cidade" value="<?= htmlspecialchars($_SESSION['usuario']['cidade'] ?? '') ?>">
             </div>
 
             <div class="form-row">
-                <label>Endereço:</label>
-                <input type="text" name="endereco"
-                    value="<?= htmlspecialchars($_SESSION['usuario']['endereco'] ?? '') ?>">
+                <label>Estado:</label>
+                <input type="text" name="estado" value="<?= htmlspecialchars($_SESSION['usuario']['estado'] ?? '') ?>">
             </div>
 
             <div class="form-row">
-                <label>Plano:</label>
-                <select name="plano">
-                    <option value="">Selecione</option>
-                    <option value="mensal" <?= (($_SESSION['usuario']['plano'] ?? '') === 'mensal') ? 'selected' : '' ?>>
-                        Mensal</option>
-                    <option value="trimestral" <?= (($_SESSION['usuario']['plano'] ?? '') === 'trimestral') ? 'selected' : '' ?>>Trimestral</option>
-                    <option value="anual" <?= (($_SESSION['usuario']['plano'] ?? '') === 'anual') ? 'selected' : '' ?>>
-                        Anual</option>
-                </select>
+                <label>Bairro:</label>
+                <input type="text" name="bairro" value="<?= htmlspecialchars($_SESSION['usuario']['bairro'] ?? '') ?>">
             </div>
 
             <div class="form-row">
-                <label>Objetivo:</label>
-                <input type="text" name="objetivo"
-                    value="<?= htmlspecialchars($_SESSION['usuario']['objetivo'] ?? '') ?>">
+                <label>Rua:</label>
+                <input type="text" name="rua" value="<?= htmlspecialchars($_SESSION['usuario']['rua'] ?? '') ?>">
             </div>
 
             <div class="form-row">
-                <label>Gênero:</label>
-                <select name="genero">
-                    <option value="">Selecione</option>
-                    <option value="masculino" <?= (($_SESSION['usuario']['genero'] ?? '') === 'masculino') ? 'selected' : '' ?>>Masculino</option>
-                    <option value="feminino" <?= (($_SESSION['usuario']['genero'] ?? '') === 'feminino') ? 'selected' : '' ?>>Feminino</option>
-                    <option value="outro" <?= (($_SESSION['usuario']['genero'] ?? '') === 'outro') ? 'selected' : '' ?>>
-                        Outro</option>
-                </select>
+                <label>Número:</label>
+                <input type="text" name="numero" value="<?= htmlspecialchars($_SESSION['usuario']['numero'] ?? '') ?>">
             </div>
 
             <div class="botoesPerfil">
@@ -72,10 +58,7 @@ include __DIR__ . '/../../Views/templates/header.php';
                 <button type="button" id="btnExcluirPerfil" class="btn btn-danger">Excluir Perfil</button>
             </div>
         </form>
-
     </div>
-
-
 </div>
 
 <script>
@@ -114,7 +97,6 @@ include __DIR__ . '/../../Views/templates/header.php';
             })
             .catch(err => console.error(err));
     });
-
 </script>
 
 <?php

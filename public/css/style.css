@@ -7,7 +7,7 @@
         }
 
         header {
-            background: #007BFF;
+            background: #1b1d20;
             color: white;
             padding: 6px 0;
             width: 100%;
@@ -40,7 +40,7 @@
         .botoes button {
             padding: 8px 16px;
             background: white;
-            color: #007BFF;
+            color: #1b1d20;
             border: none;
             border-radius: 5px;
             cursor: pointer;
@@ -83,7 +83,7 @@
         }
 
         .hero {
-            background: linear-gradient(to right, #007BFF, #0056b3);
+            background: linear-gradient(to right, #1b1d20, #414243);
             color: white;
             padding: 60px 20px;
             text-align: center;
@@ -91,7 +91,7 @@
 
         .btn {
             background: white;
-            color: #0056b3;
+            color: #414243;
             padding: 10px 20px;
             border-radius: 5px;
             text-decoration: none;
@@ -136,7 +136,7 @@
                 padding: .6rem 1.2rem;
                 border: none;
                 border-radius: 8px;
-                background: #0077ff;
+                background: #1b1d20;
                 color: #fff;
                 cursor: pointer;
                 font-size: .95rem;
@@ -144,7 +144,7 @@
             }
 
             .btn:hover {
-                background: #005fd4;
+                background: #414243;
             }
 
             /* --- MODAL --- */
@@ -219,7 +219,7 @@
 }
 /* Footer básico centralizado */
 .footer {
-    background:#007BFF; /* cor de fundo */
+    background:#1b1d20; /* cor de fundo */
     color: #fff;      /* cor do texto */
     text-align: center; /* centraliza o texto */
     padding: 3px 0;    /* espaçamento interno */
@@ -286,7 +286,7 @@ form button {
   margin-top: 15px;
   width: 100%;
   padding: 8px;
-  background-color: #007bff;
+  background-color: #1b1d20;
   color: white;
   border: none;
   border-radius: 4px;
@@ -294,7 +294,7 @@ form button {
 }
 
 form button:hover {
-  background-color: #0056b3;
+  background-color: #414243;
 }
 /* pagina de perfil */
 
@@ -444,7 +444,7 @@ footer {
     }
 
     .paginacao a.ativo {
-        background: #007bff;
+        background: #1b1d20;
         color: #fff;
         font-weight: bold;
     }
@@ -459,23 +459,23 @@ footer {
     display: inline-block;
     margin: 0 5px;
     padding: 8px 14px;
-    border: 1px solid #007bff;
+    border: 1px solid #1b1d20;
     border-radius: 5px;
     text-decoration: none;
-    color: #007bff;
+    color: #1b1d20;
     font-weight: bold;
     transition: background 0.3s, color 0.3s;
 }
 
 /* Efeito hover */
 .paginacao a:hover {
-    background: #007bff;
+    background: #1b1d20;
     color: #fff;
 }
 
 /* Página ativa */
 .paginacao a.ativo {
-    background: #007bff;
+    background: #1b1d20;
     color: #fff;
     cursor: default;
 }
@@ -561,7 +561,7 @@ footer {
         }
 
         th {
-            background-color: #007bff;
+            background-color: #1b1d20;
             color: white;
         }
 
@@ -573,15 +573,15 @@ footer {
         .paginacao a {
             margin: 0 5px;
             padding: 8px 12px;
-            border: 1px solid #007bff;
+            border: 1px solid #1b1d20;
             border-radius: 5px;
             text-decoration: none;
-            color: #007bff;
+            color: #1b1d20;
         }
 
         .paginacao a.ativo,
         .paginacao a:hover {
-            background: #007bff;
+            background: #1b1d20;
             color: #fff;
         }
        #formCadastro {
@@ -609,14 +609,14 @@ footer {
     padding: 10px;
     border: none;
     border-radius: 6px;
-    background: #007bff;
+    background: #1b1d20;
     color: white;
     font-weight: bold;
     cursor: pointer;
 }
 
 #formCadastro button:hover {
-    background: #0056b3;
+    background: #414243;
 }
 
 @media (max-width: 600px) {
@@ -689,7 +689,7 @@ footer {
 
 /* Header unificado */
 .main-header {
-    background-color: #007bff;
+    background-color: #1b1d20;
     color: white;
     padding: 10px 20px;
 }
@@ -759,7 +759,7 @@ body {
 
 /* Header */
 header.dashboard-header {
-    background: #007bff;
+    background: #1b1d20;
     color: white;
     padding: 15px 30px;
     display: flex;
@@ -816,7 +816,7 @@ header.dashboard-header nav button {
 .card h2 {
     font-size: 22px;
     margin-bottom: 10px;
-    color: #007bff;
+    color: #1b1d20;
 }
 
 .card p {
@@ -834,7 +834,7 @@ header.dashboard-header nav button {
 
 .button {
     display: inline-block;
-    background-color: #007bff;
+    background-color: #1b1d20;
     color: #fff;
     padding: 12px 25px;
     margin: 5px;
@@ -845,12 +845,12 @@ header.dashboard-header nav button {
 }
 
 .button:hover {
-    background-color: #0056b3;
+    background-color: #414243;
 }
 
 /* Footer */
 .footer {
-    background:#007BFF; /* cor de fundo */
+    background:#1b1d20; /* cor de fundo */
     color: #fff;      /* cor do texto */
     text-align: center; /* centraliza o texto */
     padding: 23px 0;    /* espaçamento interno */
@@ -900,7 +900,7 @@ header.dashboard-header nav button {
     }
 
     th {
-        background: #007bff;
+        background: #1b1d20;
         color: #fff;
     }
 
@@ -949,7 +949,7 @@ header.dashboard-header nav button {
 }
 .alert {
     background: #eaf4ff;
-    border-left: 5px solid #007bff;
+    border-left: 5px solid #1b1d20;
     padding: 10px 15px;
     margin-bottom: 10px;
     border-radius: 6px;
@@ -973,7 +973,7 @@ header.dashboard-header nav button {
 
 .notificacao-link {
     text-decoration: none;
-    color: #007bff;
+    color: #1b1d20;
     font-weight: 500;
 }
 
@@ -993,11 +993,127 @@ header.dashboard-header nav button {
 }
 
 .footerAdmin {
-    background:#007BFF; /* cor de fundo */
+    background:#1b1d20; /* cor de fundo */
     color: #fff;      /* cor do texto */
     text-align: center; /* centraliza o texto */
     padding: 23px 0;    /* espaçamento interno */
     position: fixed;
     bottom: 0;
     width: 100%;
+}
+/* ===============================
+   RESPONSIVIDADE GLOBAL
+=============================== */
+
+/* Tablets e telas médias (até 1024px) */
+@media (max-width: 1024px) {
+    /* Menu */
+    nav ul {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+
+    /* Cards de treino e dashboard */
+    .treinos-grid,
+    .cards {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .treino-card,
+    .card {
+        flex: 1 1 45%;
+        max-width: 45%;
+        margin-bottom: 20px;
+    }
+
+    /* Tabelas */
+    table, th, td {
+        font-size: 0.95rem;
+    }
+
+    /* Modais */
+    .modal-content {
+        max-width: 90%;
+        padding: 1.5rem;
+    }
+
+    /* Formulários */
+    #formCadastro,
+    .perfil-form {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* Smartphones (até 768px) */
+@media (max-width: 768px) {
+    header.dashboard-header,
+    .main-header .container {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    nav ul {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    /* Cards e grids */
+    .treino-card,
+    .card {
+        flex: 1 1 100%;
+        max-width: 100%;
+    }
+
+    /* Formulários em coluna única */
+    #formCadastro,
+    .perfil-form {
+        grid-template-columns: 1fr;
+    }
+
+    /* Tabelas com rolagem horizontal */
+    .table-container {
+        overflow-x: auto;
+    }
+
+    /* Botões e texto */
+    .btn, .btn-salvar, .btn-excluir, .btn-voltar {
+        font-size: 0.9rem;
+        padding: 8px 12px;
+    }
+}
+
+/* Telas pequenas (até 480px) */
+@media (max-width: 480px) {
+    body {
+        font-size: 0.9rem;
+    }
+
+    nav ul {
+        gap: 5px;
+    }
+
+    table, th, td {
+        font-size: 0.8rem;
+        padding: 6px;
+    }
+
+    /* Botões */
+    .btn, .btn-salvar, .btn-excluir, .btn-voltar {
+        font-size: 0.85rem;
+        padding: 6px 10px;
+    }
+
+    /* Modal */
+    .modal-content {
+        padding: 1rem;
+    }
+
+    /* Footer */
+    footer, .footer, .footerAdmin {
+        font-size: 0.85rem;
+        padding: 10px 0;
+    }
 }

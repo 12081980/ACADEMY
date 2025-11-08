@@ -108,12 +108,12 @@ class InstrutorController
     //         $instrutorId = $_SESSION['usuario_id'];
 
     //         $treinoModel = new TreinoModel();
-    //         $treinoId = $treinoModel->salvarTreino($instrutorId, $usuarioId, $treinoTipo, $exercicios);
+    //         $treinoModel->salvarTreino($instrutorId, $usuarioId, $treinoTipo, $exercicios);
 
     //         // Envia notificação
     //         $notificacaoModel = new NotificacaoModel();
     //         $mensagem = "Seu instrutor enviou o Treino $treinoTipo. Clique para ver.";
-    //         $notificacaoModel->enviar($usuarioId, $mensagem, $treinoId);
+    //         $notificacaoModel->enviar($usuarioId, $mensagem, null);
 
     //         // Redireciona para a nova página
     //         header("Location: /ACADEMY/public/instrutor/treinos_enviados");
@@ -227,4 +227,164 @@ class InstrutorController
         }
     }
 
+    public function listarUsuariosParaAvaliacao()
+    {
+        session_start();
+
+        if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['tipo'] !== 'instrutor') {
+            header("Location: /ACADEMY/public/auth/login");
+            exit;
+        }
+
+        $usuarioModel = new UsuarioModel($this->conn);
+        $usuarios = $usuarioModel->buscarTodosUsuarios();
+
+        require_once __DIR__ . '/../Views/instrutor/avaliacoes.php';
+    }
+
+
+    public function avaliacaoEscolher()
+    {
+        session_start();
+
+        if (!isset($_SESSION['usuario']['id']) || $_SESSION['usuario']['tipo'] !== 'instrutor') {
+            header('Location: /ACADEMY/public/auth/login');
+            exit;
+        }
+
+        // Buscar alunos (usuários do tipo "aluno")
+        $stmt = $this->conn->prepare("SELECT id, nome, email FROM usuario WHERE tipo = 'aluno'");
+        $stmt->execute();
+        $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        require __DIR__ . '/../Views/instrutor/avaliacoes.php';
+    }
+
+
+    public function avaliacaoFicha()
+    {
+        session_start();
+
+        if (!isset($_SESSION['usuario']['id']) || $_SESSION['usuario']['tipo'] !== 'instrutor') {
+            header('Location: /ACADEMY/public/auth/login');
+            exit;
+        }
+
+        if (!isset($_GET['usuario_id'])) {
+            header('Location: /ACADEMY/public/instrutor/avaliacaoEscolher');
+            exit;
+        }
+
+        $usuarioId = (int) $_GET['usuario_id'];
+
+        // Buscar dados do aluno
+        $stmt = $this->conn->prepare("SELECT * FROM usuario WHERE id = :id");
+        $stmt->execute([':id' => $usuarioId]);
+        $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$usuario) {
+            echo "Aluno não encontrado.";
+            exit;
+        }
+
+        require __DIR__ . '/../Views/instrutor/fichaAvaliacao.php';
+    }
+    public function salvarAvaliacao()
+    {
+        session_start();
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['status' => 'erro', 'mensagem' => 'Método não permitido']);
+            exit;
+        }
+
+        $data = $_POST;
+
+        if (empty($data['usuario_id']) || empty($data['data_avaliacao'])) {
+            echo json_encode(['status' => 'erro', 'mensagem' => 'Campos obrigatórios não preenchidos']);
+            exit;
+        }
+
+        try {
+            $stmt = $this->conn->prepare("
+            INSERT INTO avaliacoes_fisicas (
+                usuario_id, data_avaliacao, estatura, peso, imc,
+                subescapular, triceps, axilar_media, toracica, supra_iliaca, abdominal, coxa,
+                percentual_gordura, massa_magra, massa_gorda,
+                torax, cintura, abdomen, quadril,
+                coxa_direita, coxa_esquerda, perna_direita, perna_esquerda,
+                braco_direito, braco_esquerdo, antebraco_direito, antebraco_esquerdo,
+                rcq, nivel_atividade, tmb, necessidade_energetica,
+                cirurgia, patologia, medicamento, fatores_risco, atividade_atual, rotina, objetivo, observacoes,
+                avaliador
+            ) VALUES (
+                :usuario_id, :data_avaliacao, :estatura, :peso, :imc,
+                :subescapular, :triceps, :axilar_media, :toracica, :supra_iliaca, :abdominal, :coxa,
+                :percentual_gordura, :massa_magra, :massa_gorda,
+                :torax, :cintura, :abdomen, :quadril,
+                :coxa_direita, :coxa_esquerda, :perna_direita, :perna_esquerda,
+                :braco_direito, :braco_esquerdo, :antebraco_direito, :antebraco_esquerdo,
+                :rcq, :nivel_atividade, :tmb, :necessidade_energetica,
+                :cirurgia, :patologia, :medicamento, :fatores_risco, :atividade_atual, :rotina, :objetivo, :observacoes,
+                :avaliador
+            )
+        ");
+
+            $stmt->execute([
+                ':usuario_id' => $data['usuario_id'],
+                ':data_avaliacao' => $data['data_avaliacao'],
+                ':estatura' => $data['estatura'] ?? null,
+                ':peso' => $data['peso'] ?? null,
+                ':imc' => $data['imc'] ?? null,
+                ':subescapular' => $data['subescapular'] ?? null,
+                ':triceps' => $data['triceps'] ?? null,
+                ':axilar_media' => $data['axilar_media'] ?? null,
+                ':toracica' => $data['toracica'] ?? null,
+                ':supra_iliaca' => $data['supra_iliaca'] ?? null,
+                ':abdominal' => $data['abdominal'] ?? null,
+                ':coxa' => $data['coxa'] ?? null,
+                ':percentual_gordura' => $data['percentual_gordura'] ?? null,
+                ':massa_magra' => $data['massa_magra'] ?? null,
+                ':massa_gorda' => $data['massa_gorda'] ?? null,
+                ':torax' => $data['torax'] ?? null,
+                ':cintura' => $data['cintura'] ?? null,
+                ':abdomen' => $data['abdomen'] ?? null,
+                ':quadril' => $data['quadril'] ?? null,
+                ':coxa_direita' => $data['coxa_direita'] ?? null,
+                ':coxa_esquerda' => $data['coxa_esquerda'] ?? null,
+                ':perna_direita' => $data['perna_direita'] ?? null,
+                ':perna_esquerda' => $data['perna_esquerda'] ?? null,
+                ':braco_direito' => $data['braco_direito'] ?? null,
+                ':braco_esquerdo' => $data['braco_esquerdo'] ?? null,
+                ':antebraco_direito' => $data['antebraco_direito'] ?? null,
+                ':antebraco_esquerdo' => $data['antebraco_esquerdo'] ?? null,
+                ':rcq' => $data['rcq'] ?? null,
+                ':nivel_atividade' => $data['nivel_atividade'] ?? null,
+                ':tmb' => $data['tmb'] ?? null,
+                ':necessidade_energetica' => $data['necessidade_energetica'] ?? null,
+                ':cirurgia' => $data['cirurgia'] ?? null,
+                ':patologia' => $data['patologia'] ?? null,
+                ':medicamento' => $data['medicamento'] ?? null,
+                ':fatores_risco' => $data['fatores_risco'] ?? null,
+                ':atividade_atual' => $data['atividade_atual'] ?? null,
+                ':rotina' => $data['rotina'] ?? null,
+                ':objetivo' => $data['objetivo'] ?? null,
+                ':observacoes' => $data['observacoes'] ?? null,
+                ':avaliador' => $data['avaliador'] ?? null
+            ]);
+
+            echo json_encode([
+                'status' => 'sucesso',
+                'mensagem' => 'Avaliação salva com sucesso!',
+                'redirect' => '/ACADEMY/public/instrutor/avaliacaoEscolher'
+            ]);
+
+        } catch (PDOException $e) {
+            echo json_encode([
+                'status' => 'erro',
+                'mensagem' => 'Erro ao salvar avaliação: ' . $e->getMessage()
+            ]);
+        }
+    }
 }

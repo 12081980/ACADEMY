@@ -7,7 +7,7 @@ if (session_status() === PHP_SESSION_NONE)
 <?php include __DIR__ . '/../templates/menuInstrutor.php'; ?>
 
 
-<p>Bem-vindo, <strong><?= htmlspecialchars($instrutorNome ?? 'Instrutor') ?></strong>!</p>
+<p>Bem-vindo, <strong><?= htmlspecialchars($instrutorNome ?? 'nome') ?></strong>!</p>
 
 <?php if (!empty($usuarios)): ?>
     <table>

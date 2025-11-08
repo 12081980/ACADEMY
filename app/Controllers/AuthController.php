@@ -96,11 +96,12 @@ class AuthController
             $email = trim($_POST['email'] ?? '');
             $senha = $_POST['senha'] ?? '';
             $telefone = trim($_POST['telefone'] ?? null);
-            $data_nascimento = $_POST['data_nascimento'] ?? null;
             $endereco = trim($_POST['endereco'] ?? null);
-            $plano = $_POST['plano'] ?? null;
-            $objetivo = trim($_POST['objetivo'] ?? null);
-            $genero = $_POST['genero'] ?? null;
+            $cidade = trim($_POST['cidade'] ?? null);
+            $estado = trim($_POST['estado'] ?? null);
+            $bairro = trim($_POST['bairro'] ?? null);
+            $rua = trim($_POST['rua'] ?? null);
+            $numero = trim($_POST['numero'] ?? null);
             $tipo = $_POST['tipo'] ?? 'aluno';
 
             if (!$nome || !$email || !$senha) {
@@ -113,19 +114,20 @@ class AuthController
 
             $stmt = $this->conn->prepare("
             INSERT INTO usuario 
-            (nome, email, senha, telefone, data_nascimento, endereco, plano, objetivo, genero, tipo)
-            VALUES (:nome, :email, :senha, :telefone, :data_nascimento, :endereco, :plano, :objetivo, :genero, :tipo)
+            (nome, email, senha, telefone, endereco, cidade, estado, bairro, rua, numero, tipo)
+            VALUES (:nome, :email, :senha, :telefone, :endereco, :cidade, :estado, :bairro, :rua, :numero, :tipo)
         ");
 
             $stmt->bindParam(':nome', $nome);
             $stmt->bindParam(':email', $email);
             $stmt->bindParam(':senha', $hash);
             $stmt->bindParam(':telefone', $telefone);
-            $stmt->bindParam(':data_nascimento', $data_nascimento);
             $stmt->bindParam(':endereco', $endereco);
-            $stmt->bindParam(':plano', $plano);
-            $stmt->bindParam(':objetivo', $objetivo);
-            $stmt->bindParam(':genero', $genero);
+            $stmt->bindParam(':cidade', $cidade);
+            $stmt->bindParam(':estado', $estado);
+            $stmt->bindParam(':bairro', $bairro);
+            $stmt->bindParam(':rua', $rua);
+            $stmt->bindParam(':numero', $numero);
             $stmt->bindParam(':tipo', $tipo);
 
             if ($stmt->execute()) {
@@ -134,11 +136,12 @@ class AuthController
                     'nome' => $nome,
                     'email' => $email,
                     'telefone' => $telefone,
-                    'data_nascimento' => $data_nascimento,
                     'endereco' => $endereco,
-                    'plano' => $plano,
-                    'objetivo' => $objetivo,
-                    'genero' => $genero,
+                    'cidade' => $cidade,
+                    'estado' => $estado,
+                    'bairro' => $bairro,
+                    'rua' => $rua,
+                    'numero' => $numero,
                     'tipo' => $tipo
                 ];
                 header("Location: /ACADEMY/public/home");
@@ -153,6 +156,7 @@ class AuthController
         header("Location: /ACADEMY/public/home");
         exit;
     }
+
 
 
     public function logout()

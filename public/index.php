@@ -3,6 +3,8 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+date_default_timezone_set('America/Sao_Paulo');
+
 // ====== AUTOLOAD DAS DEPENDÊNCIAS BÁSICAS ======
 require_once __DIR__ . '/../core/conn.php';
 require_once __DIR__ . '/../core/Router.php';
@@ -57,6 +59,17 @@ $router->addRoute('/admin/editar_usuario/{id}', 'AdminController@editarUsuario',
 $router->addRoute('/admin/editar_usuario/{id}', 'AdminController@atualizarUsuario', 'POST');
 $router->addRoute('/admin/editar_usuario/{id}', 'AdminController@editarUsuario');
 $router->addRoute('/admin/editar_usuario/{id}', 'AdminController@atualizarUsuario');
+$router->addRoute('/instrutor/avaliacoes', 'InstrutorController@listarUsuariosParaAvaliacao');
+$router->addRoute('/instrutor/avaliacaoEscolher', 'InstrutorController@avaliacaoEscolher');
+
+$router->addRoute('/instrutor/avaliacaoFicha', 'InstrutorController@avaliacaoFicha');
+$router->addRoute('/instrutor/salvarAvaliacao', 'InstrutorController@salvarAvaliacao');
+
+
+
+
+
+
 
 // ==================================================
 // ✅ ADMINISTRAÇÃO
@@ -114,6 +127,11 @@ $basePath = '/ACADEMY/public';
 if (strpos($url, $basePath) === 0) {
     $url = substr($url, strlen($basePath));
 }
+// Detecta automaticamente o caminho base
+// $basePath = '/'; // no servidor remoto, raiz do domínio
+// if (strpos($url, $basePath) === 0) {
+//     $url = substr($url, strlen($basePath) - 1);
+// }
 
 
 // Executa a rota correspondente
