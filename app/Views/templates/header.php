@@ -24,15 +24,36 @@ if (session_status() === PHP_SESSION_NONE) {
                     <li><a href="/ACADEMY/public/treinos/em_andamento">📊 TREINOS EM ANDAMENTO</a></li>
                     <li><a href="/ACADEMY/public/treinos/graficos">📊 GRÁFICO DE EVOLUÇÃO</a></li>
                 <?php endif; ?>
+<?php
+// Inicia a sessão caso não tenha sido iniciada
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-                <!-- Link de Notificações só aparece se houver notificações -->
-                <?php if (isset($_SESSION['usuario']) && !empty($notificacoes) && is_array($notificacoes)): ?>
-                    <li>
-                        <a href="/ACADEMY/public/notificacoes">
-                            NOTIFICAÇÕES (<?= count($notificacoes) ?>)
-                        </a>
-                    </li>
-                <?php endif; ?>
+// Verifica se o usuário está logado
+$usuarioLogado = isset($_SESSION['usuario']['id']);
+
+// Conta notificações não lidas
+$novas = 0;
+if ($usuarioLogado && !empty($notificacoes)) {
+    $novas = count(array_filter($notificacoes, fn($n) => empty($n['lida']) || $n['lida'] == 0));
+}
+
+// Exibe o link apenas se houver notificações
+if ($usuarioLogado && $novas > 0):
+?>
+<li>
+    <a href="/ACADEMY/public/notificacoes" class="menu-notificacao">
+        🔔 Notificações <strong>(<?= $novas ?> novas)</strong>
+    </a>
+</li>
+<?php endif; ?>
+
+
+
+  
+
+
 
                 <?php if (isset($_SESSION['usuario']) && $_SESSION['usuario']['tipo'] === 'usuario'): ?>
                     <li><a href="/ACADEMY/public/treinos/recebidos">Treinos Recebidos</a></li>

@@ -1,51 +1,58 @@
 <?php include __DIR__ . '/../templates/menuInstrutor.php'; ?>
+<table>
+    <thead>
+        <tr>
+            <th>Aluno</th>
+            <th>Email</th>
+            <th>Tipo</th>
+            <th>Data de Envio</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php if (!empty($treinos)): ?>
+            <?php foreach ($treinos as $t): ?>
+                <tr style="background:#f4f4f4">
+                    <td><?= htmlspecialchars($t['aluno_nome'] ?? 'Não informado') ?></td>
+                    <td><?= htmlspecialchars($t['aluno_email'] ?? '-') ?></td>
+                    <td><?= htmlspecialchars($t['tipo']) ?></td>
 
-<div class="container">
-    <h2>📋 Treinos Enviados</h2>
-
-    <?php if (!empty($treinos)): ?>
-        <table>
-            <thead>
-                <tr>
-                    <th>Aluno</th>
-                    <th>Email</th>
-                    <th>Treino</th>
-                    <th>Data de Envio</th>
-                    <th>Ações</th>
+                    <td><?= htmlspecialchars(date('d/m/Y H:i', strtotime($t['criado_em']))) ?></td>
                 </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($treinos as $t): ?>
+
+                <?php if (!empty($t['exercicios'])): ?>
                     <tr>
-                        <td><?= htmlspecialchars($t['aluno_nome']) ?></td>
-                        <td><?= htmlspecialchars($t['email']) ?></td>
-                        <td><?= htmlspecialchars($t['tipo']) ?></td>
-                        <td><?= htmlspecialchars($t['data_envio']) ?></td>
-                        <td>
-                            <a href="/ACADEMY/public/treinos/ver/<?= urlencode($t['id']) ?>" class="btn">Ver Treino</a>
+                        <td colspan="5">
+                            <table style="width:100%; border-collapse:collapse; margin:5px 0; background:#fff;">
+                                <thead>
+                                    <tr style="background:#eaeaea">
+                                        <th>Exercício</th>
+                                        <th>Séries</th>
+                                        <th>Repetições</th>
+                                        <th>Carga (kg)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($t['exercicios'] as $ex): ?>
+                                        <tr>
+                                            <td><?= htmlspecialchars($ex['nome_exercicio']) ?></td>
+                                            <td><?= htmlspecialchars($ex['series']) ?></td>
+                                            <td><?= htmlspecialchars($ex['repeticoes']) ?></td>
+                                            <td><?= htmlspecialchars($ex['carga']) ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
                         </td>
-                        <td>
-                            <a href="/ACADEMY/public/treinos/ver/<?= urlencode($t['id']) ?>" class="btn">Ver</a>
-                            <a href="/ACADEMY/public/instrutor/editar_treino?id=<?= urlencode($t['id']) ?>"
-                                class="btn">Editar</a>
-                            <a href="/ACADEMY/public/instrutor/excluir_treino?id=<?= urlencode($t['id']) ?>" class="btn"
-                                onclick="return confirm('Deseja realmente excluir este treino?')">Excluir</a>
-                        </td>
-                        <td>
-                            <a href="/ACADEMY/public/treinos/ver/<?= urlencode($t['id']) ?>" class="btn">Ver</a>
-                            <a href="/ACADEMY/public/instrutor/editar_treino?id=<?= urlencode($t['id']) ?>"
-                                class="btn">Editar</a>
-                            <a href="/ACADEMY/public/instrutor/excluir_treino?id=<?= urlencode($t['id']) ?>" class="btn"
-                                onclick="return confirm('Deseja realmente excluir este treino?')">Excluir</a>
-                        </td>
-
                     </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    <?php else: ?>
-        <p>Nenhum treino enviado até o momento.</p>
-    <?php endif; ?>
-</div>
+                <?php endif; ?>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <tr>
+                <td colspan="5">Nenhum treino enviado ainda.</td>
+            </tr>
+        <?php endif; ?>
+    </tbody>
 
-<?php include __DIR__ . '/../templates/footerInstrutor.php'; ?>
+</table>
+<div>
+    <?php include __DIR__ . '/../templates/footer.php'; ?>

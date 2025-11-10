@@ -70,14 +70,30 @@ class InstrutorController
             exit;
         }
 
-        $stmt = $this->conn->prepare("INSERT INTO treino (usuario_id, tipo, status, data_inicio) VALUES (:uid, :tipo, 'pendente', NOW())");
+        // ✅ Pega o ID do instrutor logado
+        $instrutor_id = $_SESSION['usuario']['id'] ?? null;
+
+        // ===============================
+        // 1️⃣ Inserir o treino com instrutor_id
+        // ===============================
+        $stmt = $this->conn->prepare("
+        INSERT INTO treino (usuario_id, instrutor_id, tipo, status, data_inicio, criado_em)
+        VALUES (:uid, :iid, :tipo, 'pendente', NOW(), NOW())
+    ");
         $stmt->execute([
             ':uid' => $usuario_id,
+            ':iid' => $instrutor_id,
             ':tipo' => $treino_tipo
         ]);
         $treino_id = $this->conn->lastInsertId();
 
-        $stmtEx = $this->conn->prepare("INSERT INTO treino_exercicio (treino_id, nome_exercicio, series, repeticoes, carga) VALUES (:tid, :nome, :series, :repeticoes, :carga)");
+        // ===============================
+        // 2️⃣ Inserir exercícios
+        // ===============================
+        $stmtEx = $this->conn->prepare("
+        INSERT INTO treino_exercicio (treino_id, nome_exercicio, series, repeticoes, carga)
+        VALUES (:tid, :nome, :series, :repeticoes, :carga)
+    ");
         foreach ($exercicios as $ex) {
             $stmtEx->execute([
                 ':tid' => $treino_id,
@@ -88,15 +104,28 @@ class InstrutorController
             ]);
         }
 
-        // Cria notificação
-        $stmtNotif = $this->conn->prepare("INSERT INTO notificacoes (usuario_id, mensagem) VALUES (:uid, :msg)");
+        // ===============================
+        // 3️⃣ Criar notificação para o aluno
+        // ===============================
+        $stmtNotif = $this->conn->prepare("
+        INSERT INTO notificacoes (usuario_id, treino_id, mensagem)
+        VALUES (:uid, :tid, :msg)
+    ");
         $mensagem = "📩 Seu instrutor enviou um novo treino do tipo {$treino_tipo}.";
-        $stmtNotif->execute([':uid' => $usuario_id, ':msg' => $mensagem]);
+        $stmtNotif->execute([
+            ':uid' => $usuario_id,
+            ':tid' => $treino_id,
+            ':msg' => $mensagem
+        ]);
 
+        // ===============================
+        // 4️⃣ Mensagem de sucesso e redirecionamento
+        // ===============================
         $_SESSION['msg_sucesso'] = "Treino enviado com sucesso!";
-        header("Location: /ACADEMY/public/instrutor/dashboardInstrutor");
+        header("Location: /ACADEMY/public/instrutor/treinos_enviados");
         exit;
     }
+
     // public function enviar_treino()
     // {
     //     session_start();
@@ -123,18 +152,31 @@ class InstrutorController
     public function treinos_enviados()
     {
         session_start();
-        $instrutorId = $_SESSION['usuario_id'] ?? null;
 
-        if (!$instrutorId) {
+        if (!isset($_SESSION['usuario']['id'])) {
             header("Location: /ACADEMY/public/login");
             exit;
         }
 
-        $treinoModel = new TreinoModel();
+        if ($_SESSION['usuario']['tipo'] !== 'instrutor') {
+            header("Location: /ACADEMY/public/home");
+            exit;
+        }
+
+        $instrutorId = $_SESSION['usuario']['id'];
+
+        // Use a conexão já injetada no controller ($this->conn)
+        $conn = $this->conn;
+
+        // Passa a conexão para o model
+        require_once __DIR__ . '/../Models/TreinoModel.php';
+        $treinoModel = new TreinoModel($conn);
+
         $treinos = $treinoModel->getTreinosEnviadosPorInstrutor($instrutorId);
 
-        include __DIR__ . '/../Views/instrutor/treinos_enviados';
+        require_once __DIR__ . '/../Views/instrutor/treinos_enviados.php';
     }
+
     // public function enviar_treino()
     // {
     //     session_start();

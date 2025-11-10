@@ -33,18 +33,17 @@ class TreinosController
         // ✅ Buscar treinos finalizados
         // ===============================
         $sql = "SELECT 
-            t.id,
-            t.tipo,
-            t.nome,
-            COALESCE(t.data_fim, t.data_treino) AS data_treino,
-            COALESCE(t.qtd_exercicios, 0) AS qtd_exercicios,
-            COALESCE(t.peso_total, 0) AS peso_total
-        FROM treino t
-        WHERE t.usuario_id = :usuario_id
-          AND t.status = 'finalizado'
-        ORDER BY COALESCE(t.data_fim, t.data_treino) DESC
-        LIMIT :limit OFFSET :offset";
-
+                t.id,
+                t.tipo,
+                t.nome,
+                t.data_treino,
+                COALESCE(t.qtd_exercicios, 0) AS qtd_exercicios,
+                COALESCE(t.peso_total, 0) AS peso_total
+            FROM treino t
+            WHERE t.usuario_id = :usuario_id
+              AND t.status = 'finalizado'
+            ORDER BY t.data_treino DESC
+            LIMIT :limit OFFSET :offset";
 
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':usuario_id', $usuarioId, PDO::PARAM_INT);
@@ -151,123 +150,43 @@ class TreinosController
         header('Content-Type: application/json');
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            echo json_encode(['status' => 'erro', 'mensagem' => 'Método não permitido.']);
-            exit;
+            echo json_encode(['status' => 'erro', 'mensagem' => 'Método inválido.']);
+            return;
         }
 
-        if (!isset($_SESSION['usuario']['id'])) {
-            echo json_encode(['status' => 'erro', 'mensagem' => 'Usuário não autenticado.']);
-            exit;
-        }
+        $usuario_id = $_SESSION['usuario']['id'] ?? null;
+        $treino_id = $_POST['id'] ?? null; // 👈 Corrigido: vem do form
 
-        // 🔹 Lê o JSON corretamente (pois $_POST vem vazio)
-        $input = json_decode(file_get_contents('php://input'), true);
-
-        if (!$input) {
+        if (!$usuario_id || !$treino_id) {
             echo json_encode(['status' => 'erro', 'mensagem' => 'Dados inválidos.']);
-            exit;
+            return;
         }
 
-        $usuarioId = $_SESSION['usuario']['id'];
-        $nome = $input['nome'] ?? 'Treino Personalizado';
-        $descricao = $input['descricao'] ?? '';
-        $exercicios = $input['exercicios'] ?? [];
+        require_once __DIR__ . '/../Models/TreinoModel.php';
+        $treinoModel = new TreinoModel($this->conn);
 
-        $dataInicio = date('Y-m-d H:i:s');
-        $status = 'em_andamento';
+        // ✅ Inicia o treino
+        $iniciado = $treinoModel->iniciarTreino($treino_id, $usuario_id);
 
-        // 🔹 Cria treino
-        $treinoId = $this->treinoModel->criarTreino([
-            'usuario_id' => $usuarioId,
-            'nome' => $nome,
-            'descricao' => $descricao,
-            'tipo' => strtoupper(substr($nome, -1)), // A, B, C, D
-            'data_inicio' => $dataInicio,
-            'status' => $status
-        ]);
+        if ($iniciado) {
+            // ✅ Exclui notificação relacionada a este treino
+            require_once __DIR__ . '/../Models/NotificacaoModel.php';
+            $notifModel = new NotificacaoModel($this->conn);
 
-        if (!$treinoId) {
-            echo json_encode(['status' => 'erro', 'mensagem' => 'Erro ao iniciar treino.']);
-            exit;
-        }
+            $stmt = $this->conn->prepare("DELETE FROM notificacoes WHERE treino_id = :tid AND usuario_id = :uid");
+            $stmt->execute([':tid' => $treino_id, ':uid' => $usuario_id]);
 
-        // 🔹 Salva exercícios corretamente
-        foreach ($exercicios as $ex) {
-            $this->treinoModel->adicionarExercicioAoTreino($treinoId, [
-                'nome' => $ex['nome'],
-                'series' => (int) $ex['series'],
-                'repeticoes' => $ex['repeticoes'],
-                'carga' => (float) $ex['carga']
+            echo json_encode([
+                'status' => 'sucesso',
+                'mensagem' => 'Treino iniciado com sucesso!',
+                'redirect' => '/ACADEMY/public/treinos/em_andamento'
             ]);
+        } else {
+            echo json_encode(['status' => 'erro', 'mensagem' => 'Não foi possível iniciar o treino.']);
         }
-
-        echo json_encode([
-            'status' => 'sucesso',
-            'mensagem' => 'Treino iniciado com sucesso!',
-            'redirect' => '/ACADEMY/public/treinos/em_andamento'
-        ]);
     }
 
-    // public function iniciar()
-    // {
-    //     session_start();
-    //     header('Content-Type: application/json');
 
-    //     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    //         echo json_encode(['status' => 'erro', 'mensagem' => 'Método não permitido.']);
-    //         exit;
-    //     }
-
-    //     if (!isset($_SESSION['usuario']['id'])) {
-    //         echo json_encode(['status' => 'erro', 'mensagem' => 'Usuário não autenticado.']);
-    //         exit;
-    //     }
-
-    //     $usuarioId = $_SESSION['usuario']['id'];
-    //     $nome = $_POST['nome'] ?? 'Treino Personalizado';
-    //     $descricao = $_POST['descricao'] ?? null;
-    //     $dataInicio = date('Y-m-d H:i:s');
-    //     $status = 'em_andamento';
-
-    //     // Cria treino
-    //     $treinoId = $this->treinoModel->criarTreino([
-    //         'usuario_id' => $usuarioId,
-    //         'nome' => $nome,
-    //         'descricao' => $descricao,
-    //         'tipo' => strtoupper($nome), // tipo A/B/C/D
-    //         'data_inicio' => $dataInicio,
-    //         'status' => $status
-    //     ]);
-
-    //     if (!$treinoId) {
-    //         echo json_encode(['status' => 'erro', 'mensagem' => 'Erro ao iniciar treino.']);
-    //         exit;
-    //     }
-
-    //     // Processa os exercícios enviados
-    //     if (isset($_POST['exercicios'])) {
-    //         $exercicios = json_decode($_POST['exercicios'], true);
-
-    //         foreach ($exercicios as $ex) {
-    //             $this->treinoModel->adicionarExercicioAoTreino($treinoId, [
-    //                 'nome' => $ex['nome'],
-    //                 'series' => (int) $ex['series'],
-    //                 'repeticoes' => $ex['repeticoes'],
-    //                 'carga' => (float) $ex['carga']
-    //             ]);
-    //         }
-    //     }
-
-    //     echo json_encode([
-    //         'status' => 'sucesso',
-    //         'mensagem' => 'Treino iniciado com sucesso!',
-    //         'redirect' => '/ACADEMY/public/treinos/em_andamento'
-    //     ]);
-    // }
-
-    /**
-     * Finalizar treino em andamento
-     */
     public function finalizar()
     {
         session_start();

@@ -50,6 +50,7 @@ class Router
 
                 require_once $controllerPath;
 
+
                 // Cria o controller com ou sem conexão, conforme necessário
                 if ($this->db) {
                     $controller = new $controllerName($this->db);

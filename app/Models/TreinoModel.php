@@ -1,4 +1,5 @@
 <?php
+
 class TreinoModel
 {
     private $conn;
@@ -95,13 +96,15 @@ class TreinoModel
 
     public function getExerciciosDoTreino($treinoId)
     {
-        $stmt = $this->conn->prepare("
-            SELECT nome_exercicio AS nome, series, repeticoes, carga
+        $sql = "SELECT 
+                nome_exercicio,
+                series,
+                repeticoes,
+                carga
             FROM treino_exercicio
-            WHERE treino_id = :treino_id
-        ");
-        $stmt->bindValue(':treino_id', $treinoId, PDO::PARAM_INT);
-        $stmt->execute();
+            WHERE treino_id = :id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute([':id' => $treinoId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
@@ -153,6 +156,118 @@ class TreinoModel
         $stmt = $this->conn->prepare($sql);
         $stmt->bindParam(':usuario_id', $usuario_id, PDO::PARAM_INT);
         $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
+    public function getTreinosEnviadosPorInstrutor($instrutorId)
+    {
+        // 1️⃣ Buscar os treinos enviados pelo instrutor
+        $sql = "SELECT 
+                t.id AS treino_id,
+                t.tipo,
+                t.status,
+                t.data_inicio,
+                t.criado_em,
+                u.nome AS aluno_nome,
+                u.email AS aluno_email
+            FROM treino t
+            INNER JOIN usuario u ON t.usuario_id = u.id
+            WHERE t.instrutor_id = :iid
+            ORDER BY t.criado_em DESC";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute([':iid' => $instrutorId]);
+        $treinos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // 2️⃣ Para cada treino, buscar os exercícios relacionados
+        $sqlEx = "SELECT nome_exercicio, series, repeticoes, carga 
+              FROM treino_exercicio 
+              WHERE treino_id = :tid";
+        $stmtEx = $this->conn->prepare($sqlEx);
+
+        foreach ($treinos as &$t) {
+            $stmtEx->execute([':tid' => $t['treino_id']]);
+            $t['exercicios'] = $stmtEx->fetchAll(PDO::FETCH_ASSOC);
+        }
+
+        return $treinos;
+    }
+    public function getPorId($treinoId)
+    {
+        $sql = "SELECT 
+                t.id,
+                t.tipo,
+                t.status,
+                t.data_inicio,
+                t.criado_em,
+                u.nome AS aluno_nome
+            FROM treino t
+            INNER JOIN usuario u ON t.usuario_id = u.id
+            WHERE t.id = :id
+            LIMIT 1";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute([':id' => $treinoId]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+
+    // public function getExerciciosDoTreino($treinoId)
+// {
+//     $sql = "SELECT 
+//                 nome_exercicio,
+//                 series,
+//                 repeticoes,
+//                 carga
+//             FROM treino_exercicio
+//             WHERE treino_id = :id";
+//     $stmt = $this->conn->prepare($sql);
+//     $stmt->execute([':id' => $treinoId]);
+//     return $stmt->fetchAll(PDO::FETCH_ASSOC);
+// }
+
+    public function iniciarTreino($treino_id, $usuario_id)
+    {
+        try {
+            // Verifica se o treino pertence ao usuário logado
+            $stmt = $this->conn->prepare("
+            SELECT id FROM treino 
+            WHERE id = :id AND usuario_id = :uid
+        ");
+            $stmt->execute([
+                ':id' => $treino_id,
+                ':uid' => $usuario_id
+            ]);
+            $treino = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$treino) {
+                // Nenhum treino encontrado ou não pertence ao usuário
+                return false;
+            }
+
+            // Atualiza o status do treino e define a data de início
+            $stmt = $this->conn->prepare("
+            UPDATE treino 
+            SET status = 'em_andamento', data_inicio = NOW() 
+            WHERE id = :id
+        ");
+            $ok = $stmt->execute([':id' => $treino_id]);
+
+            return $ok; // true se atualizou, false se falhou
+
+        } catch (PDOException $e) {
+            error_log("Erro ao iniciar treino: " . $e->getMessage());
+            return false;
+        }
+    }
+    public function getTreinosEmAndamentoPorUsuario($usuario_id)
+    {
+        $stmt = $this->conn->prepare("
+        SELECT * FROM treino
+        WHERE usuario_id = :uid AND status = 'em_andamento'
+        ORDER BY data_inicio DESC
+    ");
+        $stmt->execute([':uid' => $usuario_id]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 

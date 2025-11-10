@@ -38,7 +38,7 @@ $router->addRoute('/instrutor/editar_treino', 'InstrutorController@editar_treino
 $router->addRoute('/instrutor/atualizar_treino', 'InstrutorController@atualizar_treino');
 $router->addRoute('/instrutor/excluir_treino', 'InstrutorController@excluir_treino');
 
-$router->addRoute('/notificacoes/ver', 'NotificacaoController@ver');
+$router->addRoute('/notificacoes/ver', 'NotificacoesController@ver');
 
 // ==================================================
 // ✅ TREINOS

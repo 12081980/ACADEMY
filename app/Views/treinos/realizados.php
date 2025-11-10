@@ -61,23 +61,4 @@
         </tbody>
     </table>
 </div>
-
-<style>
-    .treinos-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 20px;
-    }
-
-    .treinos-table th,
-    .treinos-table td {
-        border: 1px solid #ccc;
-        padding: 8px;
-        text-align: center;
-    }
-
-    .treinos-table th {
-        background-color: #007bff;
-    }
-</style>
 <?php include __DIR__ . '/../templates/footer.php'; ?>
