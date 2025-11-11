@@ -212,54 +212,29 @@ class TreinoModel
     }
 
 
-    // public function getExerciciosDoTreino($treinoId)
-// {
-//     $sql = "SELECT 
-//                 nome_exercicio,
-//                 series,
-//                 repeticoes,
-//                 carga
-//             FROM treino_exercicio
-//             WHERE treino_id = :id";
-//     $stmt = $this->conn->prepare($sql);
-//     $stmt->execute([':id' => $treinoId]);
-//     return $stmt->fetchAll(PDO::FETCH_ASSOC);
-// }
+
 
     public function iniciarTreino($treino_id, $usuario_id)
     {
         try {
-            // Verifica se o treino pertence ao usuário logado
             $stmt = $this->conn->prepare("
-            SELECT id FROM treino 
-            WHERE id = :id AND usuario_id = :uid
-        ");
+                UPDATE treino
+                SET status = 'em_andamento', data_inicio = NOW()
+                WHERE id = :id AND usuario_id = :usuario_id
+            ");
             $stmt->execute([
                 ':id' => $treino_id,
-                ':uid' => $usuario_id
+                ':usuario_id' => $usuario_id
             ]);
-            $treino = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            if (!$treino) {
-                // Nenhum treino encontrado ou não pertence ao usuário
-                return false;
-            }
-
-            // Atualiza o status do treino e define a data de início
-            $stmt = $this->conn->prepare("
-            UPDATE treino 
-            SET status = 'em_andamento', data_inicio = NOW() 
-            WHERE id = :id
-        ");
-            $ok = $stmt->execute([':id' => $treino_id]);
-
-            return $ok; // true se atualizou, false se falhou
-
+            // retorna true se algo foi alterado
+            return $stmt->rowCount() > 0;
         } catch (PDOException $e) {
-            error_log("Erro ao iniciar treino: " . $e->getMessage());
+            error_log("Erro no iniciarTreino: " . $e->getMessage());
             return false;
         }
     }
+
     public function getTreinosEmAndamentoPorUsuario($usuario_id)
     {
         $stmt = $this->conn->prepare("
