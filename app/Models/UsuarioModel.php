@@ -6,8 +6,11 @@ class UsuarioModel
 
     public function __construct($conn)
     {
+
         $this->conn = $conn;
     }
+
+
 
     /**
      * Buscar todos os usuários
@@ -22,13 +25,13 @@ class UsuarioModel
     /**
      * Buscar um usuário pelo ID
      */
-    public function getById($id)
-    {
-        $stmt = $this->conn->prepare("SELECT * FROM {$this->table} WHERE id = :id LIMIT 1");
-        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-        $stmt->execute();
-        return $stmt->fetch(PDO::FETCH_ASSOC);
-    }
+    // public function getById($id)
+    // {
+    //     $stmt = $this->conn->prepare("SELECT * FROM {$this->table} WHERE id = :id LIMIT 1");
+    //     $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+    //     $stmt->execute();
+    //     return $stmt->fetch(PDO::FETCH_ASSOC);
+    // }
 
     /**
      * Criar novo usuário
@@ -161,4 +164,57 @@ class UsuarioModel
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    // busca um usuário por id
+    public function buscarUsuarioPorId($id)
+    {
+        $stmt = $this->conn->prepare("SELECT * FROM usuario WHERE id = :id LIMIT 1");
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    // busca todos os alunos (tipo = 'aluno')
+    public function buscarAlunos()
+    {
+        $stmt = $this->conn->prepare("SELECT id, nome, email FROM usuario WHERE tipo = '' ORDER BY nome ASC");
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    public function buscarUsuarios()
+    {
+        $stmt = $this->conn->prepare("
+        SELECT id, nome, email 
+        FROM usuario 
+        WHERE tipo = '' 
+        ORDER BY nome ASC
+    ");
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+public function buscaPorId($id)
+{
+    $sql = "SELECT * FROM usuario WHERE id = ?";
+    $stmt = $this->conn->prepare($sql);
+    $stmt->execute([$id]);
+    return $stmt->fetch(PDO::FETCH_ASSOC);
 }
+public function buscarUsuariosPaginados($limit, $offset)
+{
+    $sql = "SELECT * FROM usuarios ORDER BY nome LIMIT :limit OFFSET :offset";
+    $stmt = $this->db->prepare($sql);
+    $stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
+    $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+public function contarUsuarios()
+{
+    $sql = "SELECT COUNT(*) FROM usuarios";
+    return $this->db->query($sql)->fetchColumn();
+}
+
+}
+
+

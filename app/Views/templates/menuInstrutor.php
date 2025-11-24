@@ -13,23 +13,20 @@ if (session_status() === PHP_SESSION_NONE) {
 ?>
 
 <header>
-    <div class="container">
-    <nav>
-        <ul >
-           <nav>
+<div class="container">
+  <nav>
     <ul>
-        <li><a href="/ACADEMY/public/instrutor/dashboardInstrutor" style="color:white; text-decoration:none;">🏠 INÍCIO</a></li>
+        <li><a href="/ACADEMY/public/instrutor/dashboardInstrutor">🏠 INÍCIO</a></li>
         <li><a href="/ACADEMY/public/instrutor/enviar" style="color:white; text-decoration:none;">📤 ENVIAR TREINO</a></li>
-        <li><a href="/ACADEMY/public/instrutor/treinosRealizados" style="color:white; text-decoration:none;">📋 TREINOS ENVIADOS</a></li>
-        <li><a href="/ACADEMY/public/instrutor/avaliacoes" style="color:white; text-decoration:none;">🧾 AVALIAÇÕES FÍSICAS</a></li>
+        <li><a href="/ACADEMY/public/instrutor/treinos_enviados" style="color:white; text-decoration:none;">📋 TREINOS ENVIADOS</a></li>
+        <li><a href="/ACADEMY/public/instrutor/avaliacaoEscolher" style="color:white; text-decoration:none;">🧾 AVALIAÇÕES FÍSICAS</a></li>
+        <li><a href="/ACADEMY/public/instrutor/avaliacoesSalvas">📋 AVALIAÇÕES REALIZADAS</a></li>
+
         <li><a href="/ACADEMY/public/auth/logout" style="color:white; text-decoration:none;">🚪 SAIR</a></li>
     </ul>
-</nav>
-
-            
+</nav>         
    
-        </ul>
-    </nav>
+    <div>
 </header>
 <main>
 <div class="containerBody">

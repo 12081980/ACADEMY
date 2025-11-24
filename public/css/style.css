@@ -781,7 +781,7 @@ header.dashboard-header nav button {
 /* Container principal */
 .dashboard-container {
     max-width: 1200px;
-    height: 70vh;
+    height: 60vh;
     margin: 30px auto;
     padding: 20px;
 }
@@ -827,10 +827,10 @@ header.dashboard-header nav button {
 }
 
 /* Botões / ações */
-.actions {
+/* .actions {
     margin-top: 40px;
     text-align: center;
-}
+} */
 
 .button {
     display: inline-block;
@@ -987,10 +987,10 @@ header.dashboard-header nav button {
     margin: 30px auto;
     padding: 20px;
 }
-.mainAdmin {
+/* .mainAdmin {
     flex: 1;
     /* padding: 20px; */
-}
+ */
 
 .footerAdmin {
     background:#1b1d20; /* cor de fundo */

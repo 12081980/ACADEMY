@@ -12,18 +12,22 @@ class UsuarioController
         $this->usuarioModel = new UsuarioModel($conn);
     }
 
-    public function perfil()
-    {
-        session_start();
-        if (!isset($_SESSION['usuario']['id'])) {
-            header("Location: /login");
-            exit;
-        }
-
-        $usuarioId = $_SESSION['usuario']['id'];
-        $usuario = $this->usuarioModel->getById($usuarioId);
-        require_once __DIR__ . '/../Views/usuario/perfil.php';
+   public function perfil()
+{
+    session_start();
+    if (!isset($_SESSION['usuario']['id'])) {
+        header("Location: /login");
+        exit;
     }
+
+    $usuarioId = $_SESSION['usuario']['id'];
+    $usuario = $this->usuarioModel->buscaPorId($usuarioId);
+
+    $_SESSION['usuario'] = $usuario; // 🔥 mantém a sessão sempre atualizada!
+
+    require_once __DIR__ . '/../Views/usuario/perfil.php';
+}
+
 
     public function excluir($id)
     {

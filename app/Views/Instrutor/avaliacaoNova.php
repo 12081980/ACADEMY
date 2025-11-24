@@ -173,8 +173,10 @@ if (session_status() === PHP_SESSION_NONE) {
 
             <fieldset>
                 <legend>Avaliador</legend>
-                <input type="text" name="avaliador" placeholder="Nome do Avaliador">
+                <input type="text" name="avaliador" value="<?= htmlspecialchars($_SESSION['usuario']['nome']) ?>"
+                    readonly>
             </fieldset>
+
 
             <button type="submit" class="btn-enviar">Salvar Avaliação</button>
         </form>

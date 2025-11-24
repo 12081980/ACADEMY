@@ -40,6 +40,38 @@ $router->addRoute('/instrutor/excluir_treino', 'InstrutorController@excluir_trei
 
 $router->addRoute('/notificacoes/ver', 'NotificacoesController@ver');
 
+$router->addRoute('/instrutor/salvarAvaliacao', 'InstrutorController@salvarAvaliacao', ['POST']);
+$router->addRoute('/instrutor/avaliacoes', 'InstrutorController@avaliacoes', ['GET']);
+
+$router->addRoute('/instrutor/avaliacaoEscolher', 'InstrutorController@avaliacaoEscolher', ['GET']);
+$router->addRoute('/instrutor/avaliacaoFicha', 'InstrutorController@avaliacaoFicha', ['GET']);
+$router->addRoute('/instrutor/salvarAvaliacao', 'InstrutorController@salvarAvaliacao', ['POST']);
+$router->addRoute('/instrutor/avaliacoes', 'InstrutorController@avaliacoes', ['GET']);
+$router->addRoute('/instrutor/avaliacaoVisualizar', 'InstrutorController@avaliacaoVisualizar', ['GET']);
+$router->addRoute('/instrutor/avaliacaoImprimir', 'InstrutorController@avaliacaoImprimir', ['GET']);
+
+$router->addRoute('/instrutor/avaliacaoNova/{id}', 'InstrutorController@avaliacaoNova', ['GET']);
+
+$router->addRoute('/instrutor/avaliacaoNova/{id}', 'InstrutorController@avaliacaoNova');
+$router->addRoute('/instrutor/avaliacoesSalvas', 'InstrutorController@avaliacoesSalvas');
+
+$router->addRoute('/instrutor/avaliacaoVer/{id}', 'InstrutorController@avaliacaoVer', ['GET']);
+$router->addRoute('/instrutor/avaliacaoEditar/{id}', 'InstrutorController@avaliacaoEditar', ['GET', 'POST']);
+$router->addRoute('/instrutor/avaliacaoExcluir/{id}', 'InstrutorController@avaliacaoExcluir', ['POST']);
+$router->addRoute('/instrutor/avaliacaoPdf/{id}', 'InstrutorController@avaliacaoPdf', ['GET']);
+$router->addRoute('/instrutor/avaliacaoEnviar/{id}', 'InstrutorController@avaliacaoEnviar', ['POST']);
+
+$router->addRoute('/instrutor/avaliacaoVer/{id}', 'InstrutorController@avaliacaoVer', ['GET']);
+$router->addRoute('/instrutor/avaliacaoEditar/{id}', 'InstrutorController@avaliacaoEditar', ['GET', 'POST']);
+$router->addRoute('/instrutor/avaliacaoExcluir/{id}', 'InstrutorController@avaliacaoExcluir', ['POST']);
+$router->addRoute('/instrutor/avaliacaoPdf/{id}', 'InstrutorController  @avaliacaoPdf', ['GET']);
+$router->addRoute('/instrutor/avaliacaoEnviar/{id}', 'InstrutorController@avaliacaoEnviar', ['POST']);
+
+
+$router->addRoute('/instrutor/avaliacaoExcluir/{id}', 'InstrutorController@avaliacaoExcluir');
+
+
+
 // ==================================================
 // ✅ TREINOS
 // ==================================================
@@ -63,7 +95,7 @@ $router->addRoute('/instrutor/avaliacoes', 'InstrutorController@listarUsuariosPa
 $router->addRoute('/instrutor/avaliacaoEscolher', 'InstrutorController@avaliacaoEscolher');
 
 $router->addRoute('/instrutor/avaliacaoFicha', 'InstrutorController@avaliacaoFicha');
-$router->addRoute('/instrutor/salvarAvaliacao', 'InstrutorController@salvarAvaliacao');
+
 
 
 
@@ -86,7 +118,7 @@ $router->addRoute('/admin/dashboard', 'AdminController@dashboard', ['GET']);
 
 $router->addRoute('/admin/ver_usuario/{id}', 'AdminController@verUsuario', ['GET']);
 $router->addRoute('/admin/excluir_usuario/{id}', 'AdminController@excluirUsuario', ['POST']);
-
+$router->addRoute('/admin/relatoriosAcesso','AdminController@relatoriosAcesso',['GET']);
 // ==================================================
 // ✅ USUÁRIO
 // ==================================================

@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/../Models/UsuarioModel.php';
 require_once __DIR__ . '/../Models/ExercicioModel.php';
+require_once __DIR__ . '/../Models/AvaliacaoModel.php';
+
 
 class InstrutorController
 {
@@ -126,80 +128,46 @@ class InstrutorController
         exit;
     }
 
-    // public function enviar_treino()
-    // {
-    //     session_start();
 
-    //     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    //         $usuarioId = $_POST['usuario_id'];
-    //         $treinoTipo = $_POST['treino_tipo'];
-    //         $exercicios = $_POST['exercicios'];
-    //         $instrutorId = $_SESSION['usuario_id'];
-
-    //         $treinoModel = new TreinoModel();
-    //         $treinoModel->salvarTreino($instrutorId, $usuarioId, $treinoTipo, $exercicios);
-
-    //         // Envia notificação
-    //         $notificacaoModel = new NotificacaoModel();
-    //         $mensagem = "Seu instrutor enviou o Treino $treinoTipo. Clique para ver.";
-    //         $notificacaoModel->enviar($usuarioId, $mensagem, null);
-
-    //         // Redireciona para a nova página
-    //         header("Location: /ACADEMY/public/instrutor/treinos_enviados");
-    //         exit;
-    //     }
-    //}
     public function treinos_enviados()
-    {
-        session_start();
+{
+    session_start();
 
-        if (!isset($_SESSION['usuario']['id'])) {
-            header("Location: /ACADEMY/public/login");
-            exit;
-        }
-
-        if ($_SESSION['usuario']['tipo'] !== 'instrutor') {
-            header("Location: /ACADEMY/public/home");
-            exit;
-        }
-
-        $instrutorId = $_SESSION['usuario']['id'];
-
-        // Use a conexão já injetada no controller ($this->conn)
-        $conn = $this->conn;
-
-        // Passa a conexão para o model
-        require_once __DIR__ . '/../Models/TreinoModel.php';
-        $treinoModel = new TreinoModel($conn);
-
-        $treinos = $treinoModel->getTreinosEnviadosPorInstrutor($instrutorId);
-
-        require_once __DIR__ . '/../Views/instrutor/treinos_enviados.php';
+    if (!isset($_SESSION['usuario']['id'])) {
+        header("Location: /ACADEMY/public/login");
+        exit;
     }
 
-    // public function enviar_treino()
-    // {
-    //     session_start();
+    if ($_SESSION['usuario']['tipo'] !== 'instrutor') {
+        header("Location: /ACADEMY/public/home");
+        exit;
+    }
 
-    //     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    //         $usuarioId = $_POST['usuario_id'];
-    //         $treinoTipo = $_POST['treino_tipo'];
-    //         $exercicios = $_POST['exercicios'];
-    //         $instrutorId = $_SESSION['usuario_id'];
+    $instrutorId = $_SESSION['usuario']['id'];
 
-    //         $treinoModel = new TreinoModel();
-    //         $treinoId = $treinoModel->salvarTreino($instrutorId, $usuarioId, $treinoTipo, $exercicios);
+    // Pegando pagina atual
+    $paginaAtual = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
+    if ($paginaAtual < 1) $paginaAtual = 1;
 
-    //         // Envia notificação
-    //         $notificacaoModel = new NotificacaoModel();
-    //         $mensagem = "Seu instrutor enviou o Treino $treinoTipo. Clique para ver.";
-    //         $notificacaoModel->enviar($usuarioId, $mensagem, $treinoId);
+    // Número de itens por página
+    $limite = 5;
+    $offset = ($paginaAtual - 1) * $limite;
 
-    //         // Redireciona para a nova página
-    //         header("Location: /ACADEMY/public/instrutor/treinos_enviados");
-    //         exit;
-    //     }
-    // }
+    require_once __DIR__ . '/../Models/TreinoModel.php';
+    $treinoModel = new TreinoModel($this->conn);
+
+    // Busca os treinos paginados
+    $treinos = $treinoModel->listarTreinosEnviadosPaginado($instrutorId, $limite, $offset);
+
+    // Conta total para calcular número de páginas
+    $totalRegistros = $treinoModel->contarTreinosEnviados($instrutorId);
+    $totalPaginas = ceil($totalRegistros / $limite);
+
+    // Envia para a view
+    require_once __DIR__ . '/../Views/instrutor/treinos_enviados.php';
+}
+
+   
     public function editar_treino()
     {
         session_start();
@@ -268,165 +236,289 @@ class InstrutorController
             }
         }
     }
+    public function avaliacaoEscolher()
+    {
+        $usuarioModel = new UsuarioModel($this->conn);
+
+        $usuarios = $usuarioModel->buscarTodosUsuarios();
+
+        include __DIR__ . '/../Views/instrutor/avaliacaoEscolher.php';
+    }
+
+    public function salvarAvaliacao()
+    {
+        ini_set('display_errors', 1);
+        error_reporting(E_ALL);
+
+
+        // garante que a sessão esteja iniciada antes de acessar $_SESSION
+        if (session_status() === PHP_SESSION_NONE)
+            session_start();
+
+        // usa a conexão injetada no controller
+        $avaliacaoModel = new AvaliacaoModel($this->conn);
+
+        // garantir que instrutor_id venha da sessão
+        $_POST['instrutor_id'] = $_SESSION['usuario']['id'];
+
+        $avaliacaoModel->salvar($_POST);
+
+        echo json_encode([
+            'status' => 'sucesso',
+            'mensagem' => 'Avaliação salva com sucesso!',
+            'redirect' => '/ACADEMY/public/instrutor/avaliacoesSalvas'
+        ]);
+        exit;
+    }
+
+    public function avaliacoesSalvas()
+    {
+        // garante sessão
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        // valida login e tipo
+        if (!isset($_SESSION['usuario']) || !isset($_SESSION['usuario']['id']) || $_SESSION['usuario']['tipo'] !== 'instrutor') {
+            header("Location: /ACADEMY/public/login");
+            exit;
+        }
+
+        // id do instrutor (corrigido)
+        $instrutorId = $_SESSION['usuario']['id'];
+
+        // garante que o model foi carregado
+        require_once __DIR__ . '/../Models/AvaliacaoModel.php';
+        $avaliacaoModel = new AvaliacaoModel($this->conn);
+
+        // busca avaliações feitas por este instrutor
+        $avaliacoes = $avaliacaoModel->listarPorInstrutor($instrutorId);
+
+        include __DIR__ . '/../Views/instrutor/avaliacoesSalvas.php';
+    }
+
+
 
     public function listarUsuariosParaAvaliacao()
     {
-        session_start();
-
-        if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['tipo'] !== 'instrutor') {
-            header("Location: /ACADEMY/public/auth/login");
-            exit;
+        $usuarioModel = new UsuarioModel($this->conn);
+        $usuarios = $usuarioModel->buscarUsuarios();
+        include __DIR__ . '/../Views/instrutor/avaliacaoEscolher.php';
+    }
+    public function avaliacaoNova($id = null)
+    {
+        if (!$id) {
+            echo "ID inválido!";
+            return;
         }
 
         $usuarioModel = new UsuarioModel($this->conn);
-        $usuarios = $usuarioModel->buscarTodosUsuarios();
-
-        require_once __DIR__ . '/../Views/instrutor/avaliacoes.php';
-    }
-
-
-    public function avaliacaoEscolher()
-    {
-        session_start();
-
-        if (!isset($_SESSION['usuario']['id']) || $_SESSION['usuario']['tipo'] !== 'instrutor') {
-            header('Location: /ACADEMY/public/auth/login');
-            exit;
-        }
-
-        // Buscar alunos (usuários do tipo "aluno")
-        $stmt = $this->conn->prepare("SELECT id, nome, email FROM usuario WHERE tipo = 'aluno'");
-        $stmt->execute();
-        $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        require __DIR__ . '/../Views/instrutor/avaliacoes.php';
-    }
-
-
-    public function avaliacaoFicha()
-    {
-        session_start();
-
-        if (!isset($_SESSION['usuario']['id']) || $_SESSION['usuario']['tipo'] !== 'instrutor') {
-            header('Location: /ACADEMY/public/auth/login');
-            exit;
-        }
-
-        if (!isset($_GET['usuario_id'])) {
-            header('Location: /ACADEMY/public/instrutor/avaliacaoEscolher');
-            exit;
-        }
-
-        $usuarioId = (int) $_GET['usuario_id'];
-
-        // Buscar dados do aluno
-        $stmt = $this->conn->prepare("SELECT * FROM usuario WHERE id = :id");
-        $stmt->execute([':id' => $usuarioId]);
-        $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+        $usuario = $usuarioModel->buscarUsuarioPorId($id);
 
         if (!$usuario) {
-            echo "Aluno não encontrado.";
+            echo "Usuário não encontrado!";
+            return;
+        }
+
+        require __DIR__ . '/../Views/instrutor/avaliacaoNova.php';
+    }
+    public function avaliacaoVer($id)
+    {
+        $model = new AvaliacaoModel($this->conn);
+        $avaliacao = $model->buscarPorId($id);
+
+        if (!$avaliacao) {
+            echo "Avaliação não encontrada!";
+            return;
+        }
+
+        // Ajuste: o nome sempre ficará em $avaliacao['nome']
+        if (!isset($avaliacao['nome']) && isset($avaliacao['nome_usuario'])) {
+            $avaliacao['nome'] = $avaliacao['nome_usuario'];
+        }
+
+        include __DIR__ . '/../Views/Instrutor/avaliacaoVer.php';
+    }
+
+
+    public function avaliacaoExcluir($id)
+    {
+        if (session_status() === PHP_SESSION_NONE)
+            session_start();
+
+        // somente instrutor pode excluir
+        if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['tipo'] !== 'instrutor') {
+            header("Location: /ACADEMY/public/login");
             exit;
         }
 
-        require __DIR__ . '/../Views/instrutor/fichaAvaliacao.php';
-    }
-    public function salvarAvaliacao()
-    {
-        session_start();
+        $id = (int) $id;
+        if ($id <= 0) {
+            $_SESSION['msg_erro'] = "ID inválido.";
+            header("Location: /ACADEMY/public/instrutor/avaliacoesSalvas");
+            exit;
+        }
 
+        require_once __DIR__ . '/../Models/AvaliacaoModel.php';
+        $model = new AvaliacaoModel($this->conn);
+
+        $ok = $model->excluir($id);
+
+        if ($ok) {
+            $_SESSION['msg_sucesso'] = "Avaliação excluída com sucesso.";
+        } else {
+            $_SESSION['msg_erro'] = "Erro ao excluir avaliação. Verifique logs.";
+        }
+
+        header("Location: /ACADEMY/public/instrutor/avaliacoesSalvas");
+        exit;
+    }
+
+    public function avaliacaoPdf($id)
+    {
+        $model = new AvaliacaoModel($this->conn);
+        $avaliacao = $model->buscarPorId($id);
+
+        if (!$avaliacao) {
+            echo "Avaliação não encontrada!";
+            return;
+        }
+
+        include __DIR__ . '/../Views/Instrutor/avaliacaoPdf.php';
+    }
+    public function avaliacaoEditarSalvar($id)
+    {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             http_response_code(405);
-            echo json_encode(['status' => 'erro', 'mensagem' => 'Método não permitido']);
-            exit;
+            echo "Método não permitido.";
+            return;
         }
 
-        $data = $_POST;
+        if (session_status() === PHP_SESSION_NONE)
+            session_start();
 
-        if (empty($data['usuario_id']) || empty($data['data_avaliacao'])) {
-            echo json_encode(['status' => 'erro', 'mensagem' => 'Campos obrigatórios não preenchidos']);
-            exit;
+        require_once __DIR__ . '/../Models/AvaliacaoModel.php';
+        $avaliacaoModel = new AvaliacaoModel($this->conn);
+
+        // campos esperados
+        $campos = [
+            'estatura',
+            'peso',
+            'imc',
+            'subescapular',
+            'triceps',
+            'axilar_media',
+            'toracica',
+            'supra_iliaca',
+            'abdominal',
+            'coxa',
+            'percentual_gordura',
+            'massa_magra',
+            'massa_gorda',
+            'torax',
+            'cintura',
+            'abdomen',
+            'quadril',
+            'coxa_direita',
+            'coxa_esquerda',
+            'perna_direita',
+            'perna_esquerda',
+            'braco_direito',
+            'braco_esquerdo',
+            'antebraco_direito',
+            'antebraco_esquerdo',
+            'rcdq',
+            'nivel_atividade',
+            'tmb',
+            'necessidade_energetica',
+            'cirurgia',
+            'patologia',
+            'medicamento',
+            'fatores_risco',
+            'atividade_atual',
+            'rotina',
+            'objetivo',
+            'observacoes'
+        ];
+
+        // Monte o array somente com valores vindos do formulário e normalize
+        $dados = [];
+        foreach ($campos as $campo) {
+            $valor = $_POST[$campo] ?? null;
+            // opcional: normalizar números vazios para NULL
+            if ($valor === '' || $valor === null) {
+                $dados[$campo] = null;
+            } else {
+                // se for número com vírgula, padroniza para ponto (ex: 1,75 -> 1.75)
+                if (is_string($valor) && preg_match('/^\d+,\d+$/', $valor)) {
+                    $valor = str_replace(',', '.', $valor);
+                }
+                $dados[$campo] = $valor;
+            }
         }
 
         try {
-            $stmt = $this->conn->prepare("
-            INSERT INTO avaliacoes_fisicas (
-                usuario_id, data_avaliacao, estatura, peso, imc,
-                subescapular, triceps, axilar_media, toracica, supra_iliaca, abdominal, coxa,
-                percentual_gordura, massa_magra, massa_gorda,
-                torax, cintura, abdomen, quadril,
-                coxa_direita, coxa_esquerda, perna_direita, perna_esquerda,
-                braco_direito, braco_esquerdo, antebraco_direito, antebraco_esquerdo,
-                rcq, nivel_atividade, tmb, necessidade_energetica,
-                cirurgia, patologia, medicamento, fatores_risco, atividade_atual, rotina, objetivo, observacoes,
-                avaliador
-            ) VALUES (
-                :usuario_id, :data_avaliacao, :estatura, :peso, :imc,
-                :subescapular, :triceps, :axilar_media, :toracica, :supra_iliaca, :abdominal, :coxa,
-                :percentual_gordura, :massa_magra, :massa_gorda,
-                :torax, :cintura, :abdomen, :quadril,
-                :coxa_direita, :coxa_esquerda, :perna_direita, :perna_esquerda,
-                :braco_direito, :braco_esquerdo, :antebraco_direito, :antebraco_esquerdo,
-                :rcq, :nivel_atividade, :tmb, :necessidade_energetica,
-                :cirurgia, :patologia, :medicamento, :fatores_risco, :atividade_atual, :rotina, :objetivo, :observacoes,
-                :avaliador
-            )
-        ");
+            $ok = $avaliacaoModel->atualizar($id, $dados);
+        } catch (\Exception $e) {
+            // debug temporário: grave em session e redirecione ou exiba
+            $_SESSION['msg_erro'] = "Erro ao atualizar avaliação: " . $e->getMessage();
+            header("Location: /ACADEMY/public/instrutor/avaliacaoVer/$id");
+            exit;
+        }
 
-            $stmt->execute([
-                ':usuario_id' => $data['usuario_id'],
-                ':data_avaliacao' => $data['data_avaliacao'],
-                ':estatura' => $data['estatura'] ?? null,
-                ':peso' => $data['peso'] ?? null,
-                ':imc' => $data['imc'] ?? null,
-                ':subescapular' => $data['subescapular'] ?? null,
-                ':triceps' => $data['triceps'] ?? null,
-                ':axilar_media' => $data['axilar_media'] ?? null,
-                ':toracica' => $data['toracica'] ?? null,
-                ':supra_iliaca' => $data['supra_iliaca'] ?? null,
-                ':abdominal' => $data['abdominal'] ?? null,
-                ':coxa' => $data['coxa'] ?? null,
-                ':percentual_gordura' => $data['percentual_gordura'] ?? null,
-                ':massa_magra' => $data['massa_magra'] ?? null,
-                ':massa_gorda' => $data['massa_gorda'] ?? null,
-                ':torax' => $data['torax'] ?? null,
-                ':cintura' => $data['cintura'] ?? null,
-                ':abdomen' => $data['abdomen'] ?? null,
-                ':quadril' => $data['quadril'] ?? null,
-                ':coxa_direita' => $data['coxa_direita'] ?? null,
-                ':coxa_esquerda' => $data['coxa_esquerda'] ?? null,
-                ':perna_direita' => $data['perna_direita'] ?? null,
-                ':perna_esquerda' => $data['perna_esquerda'] ?? null,
-                ':braco_direito' => $data['braco_direito'] ?? null,
-                ':braco_esquerdo' => $data['braco_esquerdo'] ?? null,
-                ':antebraco_direito' => $data['antebraco_direito'] ?? null,
-                ':antebraco_esquerdo' => $data['antebraco_esquerdo'] ?? null,
-                ':rcq' => $data['rcq'] ?? null,
-                ':nivel_atividade' => $data['nivel_atividade'] ?? null,
-                ':tmb' => $data['tmb'] ?? null,
-                ':necessidade_energetica' => $data['necessidade_energetica'] ?? null,
-                ':cirurgia' => $data['cirurgia'] ?? null,
-                ':patologia' => $data['patologia'] ?? null,
-                ':medicamento' => $data['medicamento'] ?? null,
-                ':fatores_risco' => $data['fatores_risco'] ?? null,
-                ':atividade_atual' => $data['atividade_atual'] ?? null,
-                ':rotina' => $data['rotina'] ?? null,
-                ':objetivo' => $data['objetivo'] ?? null,
-                ':observacoes' => $data['observacoes'] ?? null,
-                ':avaliador' => $data['avaliador'] ?? null
-            ]);
-
-            echo json_encode([
-                'status' => 'sucesso',
-                'mensagem' => 'Avaliação salva com sucesso!',
-                'redirect' => '/ACADEMY/public/instrutor/avaliacaoEscolher'
-            ]);
-
-        } catch (PDOException $e) {
-            echo json_encode([
-                'status' => 'erro',
-                'mensagem' => 'Erro ao salvar avaliação: ' . $e->getMessage()
-            ]);
+        if ($ok) {
+            $_SESSION['msg_sucesso'] = "Avaliação atualizada com sucesso!";
+            header("Location: /ACADEMY/public/instrutor/avaliacaoVer/$id");
+            exit;
+        } else {
+            // tentar obter mensagem de erro do model (se implementar)
+            $err = method_exists($avaliacaoModel, 'getError') ? $avaliacaoModel->getError() : 'Erro desconhecido';
+            $_SESSION['msg_erro'] = "Erro ao atualizar avaliação! $err";
+            header("Location: /ACADEMY/public/instrutor/avaliacaoVer/$id");
+            exit;
         }
     }
+
+
+
+    public function avaliacaoEditar($id)
+    {
+        if (session_status() === PHP_SESSION_NONE)
+            session_start();
+
+        require_once __DIR__ . '/../Models/AvaliacaoModel.php';
+        $model = new AvaliacaoModel($this->conn);
+
+        $avaliacao = $model->buscarPorId($id);
+
+        if (!$avaliacao) {
+            echo "Avaliação não encontrada!";
+            return;
+        }
+
+        require __DIR__ . '/../Views/Instrutor/avaliacaoEditar.php';
+    }
+    //     public function avaliacaoAtualizar($id)
+//     {
+//         if (session_status() === PHP_SESSION_NONE)
+//             session_start();
+
+    //         require_once __DIR__ . '/../Models/AvaliacaoModel.php';
+//         $model = new AvaliacaoModel($this->conn);
+
+    //         $dados = $_POST;
+
+    //         $ok = $model->atualizar($id, $dados);
+
+    //         if ($ok) {
+//             $_SESSION['msg_sucesso'] = "Avaliação atualizada com sucesso!";
+//         } else {
+//             $_SESSION['msg_erro'] = "Erro ao atualizar!";
+//         }
+
+    //         header("Location: /ACADEMY/public/instrutor/avaliacaoVer/$id");
+//         exit;
+//     }
+
+    //   // ... outros métodos ...
 }

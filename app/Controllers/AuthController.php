@@ -6,13 +6,13 @@ class AuthController
 {
     private $conn;
 
-    public function __construct($conn = null)
+    public function __construct($conn = '')
     {
         if ($conn) {
             $this->conn = $conn;
         } else {
             require __DIR__ . '/../../core/conn.php';
-            $this->conn = $conn ?? (isset($conn) ? $conn : null);
+            $this->conn = $conn ?? (isset($conn) ? $conn : '');
         }
 
         if (session_status() === PHP_SESSION_NONE) {
@@ -89,20 +89,19 @@ class AuthController
 
     public function register()
     {
-        session_start();
+      
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $nome = trim($_POST['nome'] ?? '');
             $email = trim($_POST['email'] ?? '');
             $senha = $_POST['senha'] ?? '';
-            $telefone = trim($_POST['telefone'] ?? null);
-            $endereco = trim($_POST['endereco'] ?? null);
-            $cidade = trim($_POST['cidade'] ?? null);
-            $estado = trim($_POST['estado'] ?? null);
-            $bairro = trim($_POST['bairro'] ?? null);
-            $rua = trim($_POST['rua'] ?? null);
-            $numero = trim($_POST['numero'] ?? null);
-            $tipo = $_POST['tipo'] ?? 'aluno';
+            $telefone = trim($_POST['telefone'] ?? '');           
+            $cidade = trim($_POST['cidade'] ?? '');
+            $estado = trim($_POST['estado'] ?? '');
+            $bairro = trim($_POST['bairro'] ?? '');
+            $rua = trim($_POST['rua'] ?? '');
+            $numero = trim($_POST['numero'] ?? '');
+            $tipo = $_POST['tipo'] ?? '';
 
             if (!$nome || !$email || !$senha) {
                 $_SESSION['erro_cadastro'] = "Preencha todos os campos obrigatórios!";
@@ -114,15 +113,14 @@ class AuthController
 
             $stmt = $this->conn->prepare("
             INSERT INTO usuario 
-            (nome, email, senha, telefone, endereco, cidade, estado, bairro, rua, numero, tipo)
-            VALUES (:nome, :email, :senha, :telefone, :endereco, :cidade, :estado, :bairro, :rua, :numero, :tipo)
+            (nome, email, senha, telefone, cidade, estado, bairro, rua, numero, tipo)
+            VALUES (:nome, :email, :senha, :telefone,  :cidade, :estado, :bairro, :rua, :numero, :tipo)
         ");
 
             $stmt->bindParam(':nome', $nome);
             $stmt->bindParam(':email', $email);
             $stmt->bindParam(':senha', $hash);
-            $stmt->bindParam(':telefone', $telefone);
-            $stmt->bindParam(':endereco', $endereco);
+            $stmt->bindParam(':telefone', $telefone);          
             $stmt->bindParam(':cidade', $cidade);
             $stmt->bindParam(':estado', $estado);
             $stmt->bindParam(':bairro', $bairro);
@@ -135,8 +133,7 @@ class AuthController
                     'id' => $this->conn->lastInsertId(),
                     'nome' => $nome,
                     'email' => $email,
-                    'telefone' => $telefone,
-                    'endereco' => $endereco,
+                    'telefone' => $telefone,                 
                     'cidade' => $cidade,
                     'estado' => $estado,
                     'bairro' => $bairro,

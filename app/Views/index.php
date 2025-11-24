@@ -38,10 +38,11 @@
             <input type="hidden" name="descricao" value="Glúteos + Posteriores + Core">
 
             <div class="exercicio">
-                <input list="listaExerciciosA" name="exercicio[]" placeholder="Exercício" required>
-                <input type="number" name="series[]" placeholder="Séries" min="1" required>
-                <input type="text" name="repeticoes[]" placeholder="Repetições" required>
-                <input type="text" name="peso[]" placeholder="Peso (kg ou livre)" required>
+                <input list="listaExerciciosA" name="exercicio[]" class="inp-exercicio" placeholder="Exercício"
+                    required>
+                <input type="number" name="series[]" class="inp-series" placeholder="Séries" min="1" required>
+                <input type="text" name="repeticoes[]" class="inp-repeticoes" placeholder="Repetições" required>
+                <input type="text" name="peso[]" class="inp-peso" placeholder="Peso (kg ou livre)" required>
             </div>
 
             <button type="submit" class="btn-iniciar-treino">Iniciar Treino</button>
@@ -69,10 +70,11 @@
             <input type="hidden" name="descricao" value="Membros Superiores + Core">
 
             <div class="exercicio">
-                <input list="listaExerciciosB" name="exercicio[]" placeholder="Exercício" required>
-                <input type="number" name="series[]" placeholder="Séries" min="1" required>
-                <input type="text" name="repeticoes[]" placeholder="Repetições" required>
-                <input type="text" name="peso[]" placeholder="Peso (kg ou livre)" required>
+                <input list="listaExerciciosB" name="exercicio[]" class="inp-exercicio" placeholder="Exercício"
+                    required>
+                <input type="number" name="series[]" class="inp-series" placeholder="Séries" min="1" required>
+                <input type="text" name="repeticoes[]" class="inp-repeticoes" placeholder="Repetições" required>
+                <input type="text" name="peso[]" class="inp-peso" placeholder="Peso (kg ou livre)" required>
             </div>
 
             <button type="submit" class="btn-iniciar-treino">Iniciar Treino</button>
@@ -100,10 +102,11 @@
             <input type="hidden" name="descricao" value="Quadríceps + Glúteos + Core">
 
             <div class="exercicio">
-                <input list="listaExerciciosC" name="exercicio[]" placeholder="Exercício" required>
-                <input type="number" name="series[]" placeholder="Séries" min="1" required>
-                <input type="text" name="repeticoes[]" placeholder="Repetições" required>
-                <input type="text" name="peso[]" placeholder="Peso (kg ou livre)" required>
+                <input list="listaExerciciosC" name="exercicio[]" class="inp-exercicio" placeholder="Exercício"
+                    required>
+                <input type="number" name="series[]" class="inp-series" placeholder="Séries" min="1" required>
+                <input type="text" name="repeticoes[]" class="inp-repeticoes" placeholder="Repetições" required>
+                <input type="text" name="peso[]" class="inp-peso" placeholder="Peso (kg ou livre)" required>
             </div>
 
             <button type="submit" class="btn-iniciar-treino">Iniciar Treino</button>
@@ -131,10 +134,11 @@
             <input type="hidden" name="descricao" value="Superiores Posturais + Core">
 
             <div class="exercicio">
-                <input list="listaExerciciosD" name="exercicio[]" placeholder="Exercício" required>
-                <input type="number" name="series[]" placeholder="Séries" min="1" required>
-                <input type="text" name="repeticoes[]" placeholder="Repetições" required>
-                <input type="text" name="peso[]" placeholder="Peso (kg ou livre)" required>
+                <input list="listaExerciciosD" name="exercicio[]" class="inp-exercicio" placeholder="Exercício"
+                    required>
+                <input type="number" name="series[]" class="inp-series" placeholder="Séries" min="1" required>
+                <input type="text" name="repeticoes[]" class="inp-repeticoes" placeholder="Repetições" required>
+                <input type="text" name="peso[]" class="inp-peso" placeholder="Peso (kg ou livre)" required>
             </div>
 
             <button type="submit" class="btn-iniciar-treino">Iniciar Treino</button>
@@ -151,70 +155,54 @@
         </datalist>
     </div>
 </div>
+<script>
+    const usuario_id = <?= json_encode($_SESSION['usuario']['id'] ?? null) ?>;
+</script>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        // Abrir modal
-        document.querySelectorAll(".btn[data-modal]").forEach(btn => {
-            btn.addEventListener("click", function () {
-                const modal = document.getElementById(this.dataset.modal);
-                modal.classList.add("open");
-            });
+document.querySelectorAll(".formTreino").forEach(form => {
+
+    form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const nome = this.querySelector("input[name='nome']").value;
+        const descricao = this.querySelector("input[name='descricao']").value;
+
+        const dados = new FormData();
+        dados.append("nome", nome);
+       dados.append("tipo", this.dataset.tipo);
+
+        dados.append("descricao", descricao);
+        dados.append("usuario_id", usuario_id); // 👈 ESSENCIAL
+
+        const exercicios = this.querySelectorAll(".exercicio");
+
+        exercicios.forEach((div, index) => {
+            dados.append(`exercicios[${index}][nome]`, div.querySelector(".inp-exercicio").value);
+            dados.append(`exercicios[${index}][series]`, div.querySelector(".inp-series").value);
+            dados.append(`exercicios[${index}][repeticoes]`, div.querySelector(".inp-repeticoes").value);
+            dados.append(`exercicios[${index}][peso]`, div.querySelector(".inp-peso").value);
         });
 
-        // Fechar modal
-        document.querySelectorAll(".close-btn").forEach(btn => {
-            btn.addEventListener("click", function () {
-                this.closest(".modal").classList.remove("open");
+        try {
+            const response = await fetch("/ACADEMY/public/treinos/iniciar", {
+                method: "POST",
+                body: dados
             });
-        });
 
-        // Iniciar treino
-        document.querySelectorAll(".formTreino").forEach(form => {
-            form.addEventListener("submit", async function (e) {
-                e.preventDefault();
+            const resultado = await response.json();
 
-                const formData = new FormData(form);
-                const nome = formData.get('nome') || 'Treino Personalizado';
-                const descricao = formData.get('descricao') || '';
+            if (resultado.status === "sucesso") {
+                window.location.href = resultado.redirect;
+            } else {
+                alert("❌ " + resultado.mensagem);
+            }
 
-                const nomes = formData.getAll('exercicio[]');
-                const series = formData.getAll('series[]');
-                const repeticoes = formData.getAll('repeticoes[]');
-                const pesos = formData.getAll('peso[]');
-
-                const exercicios = nomes.map((n, i) => ({
-                    nome: n.trim(),
-                    series: parseInt(series[i]) || 0,
-                    repeticoes: repeticoes[i] || '',
-                    carga: parseFloat(pesos[i].replace(',', '.')) || 0
-                })).filter(ex => ex.nome !== '');
-
-                if (exercicios.length === 0) {
-                    alert("⚠️ Adicione pelo menos um exercício!");
-                    return;
-                }
-
-                try {
-                    const response = await fetch("/ACADEMY/public/treinos/iniciar", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ nome, descricao, exercicios })
-                    });
-
-                    const data = await response.json();
-
-                    if (data.status === "sucesso") {
-                        alert(data.mensagem);
-                        window.location.href = data.redirect;
-                    } else {
-                        alert("❌ " + data.mensagem);
-                    }
-                } catch (err) {
-                    console.error(err);
-                    alert("❌ Erro ao conectar com o servidor.");
-                }
-            });
-        });
+        } catch (error) {
+            alert("⚠ Erro ao conectar com o servidor.");
+        }
     });
+
+});
+
 </script>

@@ -206,6 +206,46 @@ class AdminController
         header("Location: /ACADEMY/public/admin/lista_usuarios");
         exit;
     }
+public function relatoriosAcesso()
+{
+    if (session_status() === PHP_SESSION_NONE) session_start();
 
+    if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['tipo'] !== 'admin') {
+        header("Location: /ACADEMY/public/login");
+        exit;
+    }
+
+    $stmt = $this->conn->query("
+        SELECT la.*, u.nome 
+        FROM logs_acesso la
+        JOIN usuario u ON la.usuario_id = u.id
+        ORDER BY la.data_acesso DESC
+        LIMIT 200
+    ");
+
+    $logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    require_once __DIR__ . '/../Views/Admin/relatoriosAcesso.php';
+}
+
+public function lista_usuario()
+{
+    $usuarioModel = new UsuarioModel();
+
+    // Paginação
+    $paginaAtual = isset($_GET['pagina']) ? (int) $_GET['pagina'] : 1;
+    $limit = 10;
+    $offset = ($paginaAtual - 1) * $limit;
+
+    $usuarios = $usuarioModel->buscarUsuariosPaginados($limit, $offset);
+    $totalUsuarios = $usuarioModel->contarUsuarios();
+    $totalPaginas = ceil($totalUsuarios / $limit);
+
+    $this->view('admin/listaUsuario', [
+        'usuarios' => $usuarios,
+        'paginaAtual' => $paginaAtual,
+        'totalPaginas' => $totalPaginas
+    ]);
+}
 
 }

@@ -5,7 +5,8 @@
 
     <?php if (isset($treino) && $treino): ?>
         <div class="card">
-            <h3><?= htmlspecialchars($treino['nome']); ?></h3>
+            <h2><?= htmlspecialchars($treino['nome'] ?? '') ?></h2>
+
             <p><strong>Iniciado em:</strong> <?= date('d/m/Y H:i', strtotime($treino['data_inicio'])); ?></p>
             <p><strong>Status:</strong> <?= htmlspecialchars($treino['status']); ?></p>
 

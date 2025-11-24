@@ -1,4 +1,13 @@
 <?php include __DIR__ . '/../templates/menuInstrutor.php'; ?>
+<div class="container">
+<?php
+
+$paginaAtual = $paginaAtual ?? 1;
+$totalPaginas = !empty($totalPaginas) ? $totalPaginas : 1;
+$treinos = !empty($treinos) ? $treinos : [];
+?>
+
+
 <table>
     <thead>
         <tr>
@@ -14,9 +23,8 @@
                 <tr style="background:#f4f4f4">
                     <td><?= htmlspecialchars($t['aluno_nome'] ?? 'Não informado') ?></td>
                     <td><?= htmlspecialchars($t['aluno_email'] ?? '-') ?></td>
-                    <td><?= htmlspecialchars($t['tipo']) ?></td>
-
-                    <td><?= htmlspecialchars(date('d/m/Y H:i', strtotime($t['criado_em']))) ?></td>
+                    <td><?= htmlspecialchars($t['tipo'] ?? '-') ?></td>
+                    <td><?= htmlspecialchars(!empty($t['criado_em']) ? date('d/m/Y H:i', strtotime($t['criado_em'])) : '-') ?></td>
                 </tr>
 
                 <?php if (!empty($t['exercicios'])): ?>
@@ -34,10 +42,10 @@
                                 <tbody>
                                     <?php foreach ($t['exercicios'] as $ex): ?>
                                         <tr>
-                                            <td><?= htmlspecialchars($ex['nome_exercicio']) ?></td>
-                                            <td><?= htmlspecialchars($ex['series']) ?></td>
-                                            <td><?= htmlspecialchars($ex['repeticoes']) ?></td>
-                                            <td><?= htmlspecialchars($ex['carga']) ?></td>
+                                            <td><?= htmlspecialchars($ex['nome_exercicio'] ?? '-') ?></td>
+                                            <td><?= htmlspecialchars($ex['series'] ?? '-') ?></td>
+                                            <td><?= htmlspecialchars($ex['repeticoes'] ?? '-') ?></td>
+                                            <td><?= htmlspecialchars($ex['carga'] ?? '-') ?></td>
                                         </tr>
                                     <?php endforeach; ?>
                                 </tbody>
@@ -52,7 +60,24 @@
             </tr>
         <?php endif; ?>
     </tbody>
-
 </table>
-<div>
-    <?php include __DIR__ . '/../templates/footer.php'; ?>
+
+ <?php if ($totalPaginas > 1): ?>
+    <div class="paginacao" style="margin-top:20px; text-align:center;">
+        <?php for ($i = 1; $i <= $totalPaginas; $i++): ?>
+            <?php if ($i == $paginaAtual): ?>
+                <strong>[<?= $i ?>]</strong>
+            <?php else: ?>
+               <a href="/ACADEMY/public/instrutor/treinos/enviados?pagina=<?= $i ?>" 
+                   style="margin:0 5px; text-decoration:none; <?= $paginaAtual == $i ? 'font-weight: bold; color: red;' : '' ?>">
+                   <?= $i ?>
+               </a>
+            <?php endif; ?>
+        <?php endfor; ?>
+    </div>
+<?php endif; ?>
+
+</div>
+ <?php include __DIR__ . '/../templates/footer.php'; ?>  
+
+
