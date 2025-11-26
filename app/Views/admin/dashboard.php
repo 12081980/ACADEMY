@@ -4,17 +4,13 @@
         <div class="card users">
             <h2>👥 Usuários Cadastrados</h2>
             <p><?= $totalUsuarios ?? 0 ?></p>
-        </div>
-
-        <div class="card students">
-            <h2>🧑‍🎓 Alunos Ativos</h2>
-            <p><?= $totalAlunos ?? 0 ?></p>
-        </div>
+        </div>   
 
         <div class="card trainers">
-            <h2>🏋️‍♂️ Instrutores</h2>
-            <p><?= $totalInstrutores ?? 0 ?></p>
+             <h2>  🏋️‍♂️ <strong>Instrutores</h2>
+            <p><?= $dados['instrutores_total'] ?></p>
         </div>
+        
     </div>
 
     <div class="actions">

@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/../../core/conn.php';
 require_once __DIR__ . '/../Models/UsuarioModel.php';
+require_once __DIR__ . '/../Models/AcessoModel.php';
+
 
 class AuthController
 {
@@ -24,7 +26,7 @@ class AuthController
     public function login()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            session_start();
+       
 
             $email = trim($_POST['email'] ?? '');
             $senha = $_POST['senha'] ?? '';
@@ -40,52 +42,57 @@ class AuthController
             $stmt->execute();
             $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            if ($usuario && (password_verify($senha, $usuario['senha']) || $senha === $usuario['senha'])) {
+           if ($usuario && (password_verify($senha, $usuario['senha']) || $senha === $usuario['senha'])) {
 
-                // Atualiza senha antiga para hash, se necessário
-                if ($senha === $usuario['senha']) {
-                    $hash = password_hash($senha, PASSWORD_DEFAULT);
-                    $up = $this->conn->prepare("UPDATE usuario SET senha = :hash WHERE id = :id");
-                    $up->execute([':hash' => $hash, ':id' => $usuario['id']]);
-                }
+    if ($senha === $usuario['senha']) {
+        $hash = password_hash($senha, PASSWORD_DEFAULT);
+        $up = $this->conn->prepare("UPDATE usuario SET senha = :hash WHERE id = :id");
+        $up->execute([':hash' => $hash, ':id' => $usuario['id']]);
+    }
 
-                // Define tipo padrão (caso não exista)
-                $tipo = $usuario['tipo'] ?? 'aluno';
+    $tipo = $usuario['tipo'] ?? 'aluno';
 
-                $_SESSION['usuario'] = [
-                    'id' => $usuario['id'],
-                    'nome' => $usuario['nome'],
-                    'email' => $usuario['email'],
-                    'tipo' => $tipo
-                ];
+    $_SESSION['usuario'] = [
+        'id' => $usuario['id'],
+        'nome' => $usuario['nome'],
+        'email' => $usuario['email'],
+        'tipo' => $tipo
+    ];
 
-                // Redirecionamento conforme tipo de usuário
-                switch ($tipo) {
-                    case 'admin':
-                        header("Location: /ACADEMY/public/admin/dashboard");
-                        break;
-                    case 'instrutor':
-                        header("Location: /ACADEMY/public/instrutor/dashboardInstrutor");
-                        break;
-                    default:
-                        header("Location: /ACADEMY/public");
-                        break;
-                }
-                exit;
-            }
+    // 🔥 Registrar acesso
+    require_once __DIR__ . '/../Models/AcessoModel.php';
+    $model = new AcessoModel($this->conn);
+    $model->registrar([
+        'usuario_id'   => $usuario['id'],
+        'nome_usuario' => $usuario['nome'],
+        'tipo_usuario' => $tipo,
+        'ip'           => $_SERVER['REMOTE_ADDR'],
+        'navegador'    => $_SERVER['HTTP_USER_AGENT'],
+        'data_acesso'  => date('Y-m-d'),
+        'hora_acesso'  => date('H:i:s')
+    ]);
 
-            // Falha no login
-            $_SESSION['erro_login'] = "Email ou senha incorretos!";
+    switch ($tipo) {
+        case 'admin':
+            header("Location: /ACADEMY/public/admin/dashboard");
+            break;
+        case 'instrutor':
+            header("Location: /ACADEMY/public/instrutor/dashboardInstrutor");
+            break;
+        default:
             header("Location: /ACADEMY/public");
-            exit;
-        }
+            break;
+    }
+    exit;
+}
+
 
         // Se for GET, redireciona para página inicial
         header("Location: /ACADEMY/public");
         exit;
     }
 
-
+    }
 
     public function register()
     {

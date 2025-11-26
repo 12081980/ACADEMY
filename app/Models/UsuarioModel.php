@@ -214,6 +214,15 @@ public function contarUsuarios()
     $sql = "SELECT COUNT(*) FROM usuarios";
     return $this->db->query($sql)->fetchColumn();
 }
+public function totalUsuarios() {
+    $sql = $this->conn->query("SELECT COUNT(*) AS total FROM usuario");
+    return $sql->fetch(PDO::FETCH_ASSOC)['total'];
+}
+
+public function totalInstrutores() {
+    $sql = $this->conn->query("SELECT COUNT(*) AS total FROM usuario WHERE tipo = 'instrutor'");
+    return $sql->fetch(PDO::FETCH_ASSOC)['total'];
+}
 
 }
 

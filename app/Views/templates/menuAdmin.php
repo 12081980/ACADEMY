@@ -22,5 +22,6 @@
                 </li>
             </ul>
         </nav>
-    </header>    
-<div class="dashboard-container">
+    </header>  
+    <main>
+<div class="dashboard-container">  

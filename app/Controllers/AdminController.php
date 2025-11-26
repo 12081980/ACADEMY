@@ -163,13 +163,17 @@ class AdminController
             $stmt = $this->conn->query("SELECT COUNT(*) AS total FROM usuario WHERE tipo = ''");
             $totalUsuarios = $stmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
 
-            // Total de treinos realizados (finalizados)
-            $stmt = $this->conn->query("SELECT COUNT(*) AS total FROM treino WHERE status = 'finalizado'");
-            $totalTreinosFinalizados = $stmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
+             $model = new UsuarioModel($this->conn);
 
-            // Total de treinos em andamento
-            $stmt = $this->conn->query("SELECT COUNT(*) AS total FROM treino WHERE status = 'em_andamento'");
-            $totalTreinosEmAndamento = $stmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
+    $dados = [
+        'usuarios_total'     => $model->totalUsuarios(),
+        // 'alunos_total'       => $model->totalAlunos(),
+        'instrutores_total'  => $model->totalInstrutores()
+    ];
+
+    require __DIR__ . '/../Views/admin/dashboard.php';
+
+            
 
             // Inclui a view corretamente
             include __DIR__ . '/../views/admin/dashboard.php';
@@ -217,15 +221,15 @@ public function relatoriosAcesso()
 
     $stmt = $this->conn->query("
         SELECT la.*, u.nome 
-        FROM logs_acesso la
+        FROM acessos la
         JOIN usuario u ON la.usuario_id = u.id
         ORDER BY la.data_acesso DESC
         LIMIT 200
     ");
 
-    $logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+   $lista = $stmt->fetchAll(PDO::FETCH_ASSOC);
+require_once __DIR__ . '/../Views/admin/acesso.php';
 
-    require_once __DIR__ . '/../Views/Admin/relatoriosAcesso.php';
 }
 
 public function lista_usuario()
@@ -247,5 +251,18 @@ public function lista_usuario()
         'totalPaginas' => $totalPaginas
     ]);
 }
+public function acessos()
+{
+    $model = new AcessoModel();
+    $lista = $model->listar(); // retorna array
+    require __DIR__ . '/../Views/admin/acesso.php';
+}
+// public function acesso()
+// {
+//     $model = new LogAcessoModel();
+//     $lista = $model->listar();
+
+//     include __DIR__ . "/../Views/admin/acesso.php";
+// }
 
 }
