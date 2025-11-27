@@ -10,13 +10,9 @@ class TreinoModel
     }
 public function criarTreino(array $dados)
 {
-    // log entrada
-    file_put_contents(__DIR__ . "/LOG_MODEL_criar_input.txt", date('Y-m-d H:i:s') . " " . print_r($dados, true) . "\n\n", FILE_APPEND);
-
     try {
         $this->conn->beginTransaction();
 
-        // Insere treino principal (instrutor_id NULL por padrão)
         $stmt = $this->conn->prepare("
             INSERT INTO treino (usuario_id, instrutor_id, nome, tipo, descricao, status, data_inicio)
             VALUES (:usuario_id, NULL, :nome, :tipo, :descricao, :status, :data_inicio)
@@ -33,51 +29,40 @@ public function criarTreino(array $dados)
 
         $treino_id = $this->conn->lastInsertId();
 
-        // Inserir exercícios — adaptar diferentes chaves que possam vir do front
         if (!empty($dados['exercicios']) && is_array($dados['exercicios'])) {
-
             $stmtEx = $this->conn->prepare("
                 INSERT INTO treino_exercicio (treino_id, nome_exercicio, series, repeticoes, carga)
                 VALUES (:treino_id, :nome_exercicio, :series, :repeticoes, :carga)
             ");
 
             foreach ($dados['exercicios'] as $ex) {
-                // aceita formatos variados
                 $nome = $ex['nome'] ?? $ex['exercicio'] ?? $ex['nome_exercicio'] ?? '';
-                $series = $ex['series'] ?? $ex['serie'] ?? $ex['series'] ?? 1;
-                $repeticoes = $ex['repeticoes'] ?? $ex['reps'] ?? $ex['repeticao'] ?? 1;
-                // aceita carga ou peso
-                $carga = $ex['carga'] ?? $ex['peso'] ?? $ex['load'] ?? 0;
-
-                // segurança mínima
-                $nome = trim($nome);
-                $series = intval($series);
-                $repeticoes = intval($repeticoes);
-                $carga = is_numeric($carga) ? floatval($carga) : 0;
+                $series = $ex['series'] ?? $ex['serie'] ?? 1;
+                $repeticoes = $ex['repeticoes'] ?? $ex['reps'] ?? 1;
+                $carga = $ex['carga'] ?? $ex['peso'] ?? 0;
 
                 $stmtEx->execute([
                     ':treino_id' => $treino_id,
-                    ':nome_exercicio' => $nome ?: 'Exercício',
-                    ':series' => $series,
-                    ':repeticoes' => $repeticoes,
-                    ':carga' => $carga
+                    ':nome_exercicio' => trim($nome) ?: 'Exercício',
+                    ':series' => intval($series),
+                    ':repeticoes' => intval($repeticoes),
+                    ':carga' => is_numeric($carga) ? floatval($carga) : 0
                 ]);
             }
         }
 
         $this->conn->commit();
 
-        file_put_contents(__DIR__ . "/LOG_MODEL_criar_success.txt", date('Y-m-d H:i:s') . " criado treino_id={$treino_id}\n", FILE_APPEND);
         return $treino_id;
 
     } catch (Exception $e) {
         $this->conn->rollBack();
-        // log completo para debugar
         file_put_contents(__DIR__ . "/LOG_MODEL_criar_error.txt", date('Y-m-d H:i:s') . " Erro: " . $e->getMessage() . "\nDados: " . print_r($dados, true) . "\nTrace:\n" . $e->getTraceAsString() . "\n\n", FILE_APPEND);
         error_log("Erro criarTreino: " . $e->getMessage());
         return false;
     }
 }
+
     public function finalizarTreino($treinoId)
     {
         $stmt = $this->conn->prepare("
@@ -252,33 +237,30 @@ public function criarTreino(array $dados)
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-
-    public function iniciarTreino($treino_id, $usuario_id)
-    {
-        try {
-            // Permitir iniciar mesmo que status seja "aguardando", "personalizado", "novo" ou NULL
-            $stmt = $this->conn->prepare("
+public function iniciarTreino($treino_id, $usuario_id)
+{
+    try {
+        $stmt = $this->conn->prepare("
             UPDATE treino
             SET status = 'em_andamento', data_inicio = NOW()
             WHERE id = :id 
               AND usuario_id = :uid
-              AND (status IN ('aguardando', 'novo', 'personalizado', 'enviado') 
-                   OR status IS NULL 
-                   OR status != 'finalizado')
+              AND (status IS NULL OR status != 'finalizado')
         ");
 
-            $stmt->execute([
-                ':id' => $treino_id,
-                ':usuario_id' => $usuario_id
-            ]);
+        $stmt->execute([
+            ':id' => $treino_id,
+            ':uid' => $usuario_id
+        ]);
 
-            // retorna true se alguma linha foi afetada
-            return $stmt->rowCount() > 0;
-        } catch (PDOException $e) {
-            error_log("Erro no iniciarTreino: " . $e->getMessage());
-            return false;
-        }
+        return $stmt->rowCount() > 0;
+    } catch (PDOException $e) {
+        error_log("Erro no iniciarTreino: " . $e->getMessage());
+        return false;
     }
+}
+
+
     public function salvarExerciciosDoTreino($treino_id, $exercicios)
     {
         if (empty($exercicios)) {

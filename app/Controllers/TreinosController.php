@@ -83,10 +83,8 @@ class TreinosController
   public function iniciar()
 {
     if (session_status() === PHP_SESSION_NONE) session_start();
-    header('Content-Type: application/json');
-
-    // log request para depuração
-    file_put_contents(__DIR__ . "/../Controllers/log_iniciar.txt", date('Y-m-d H:i:s') . " REQUEST:\n" . print_r($_POST, true) . "\nRAW:\n" . file_get_contents("php://input") . "\n\n", FILE_APPEND);
+    header('Content-Type: application/json'); 
+  
 
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         echo json_encode(['status' => 'erro', 'mensagem' => 'Método não permitido.']);
