@@ -5,8 +5,6 @@ $paginaAtual = $paginaAtual ?? 1;
 $totalPaginas = !empty($totalPaginas) ? $totalPaginas : 1;
 $treinos = !empty($treinos) ? $treinos : [];
 ?>
-
-
 <div class="container">  
 
     <table class="treinos-table" border="1" cellpadding="8" cellspacing="0">
@@ -76,9 +74,6 @@ $treinos = !empty($treinos) ? $treinos : [];
    style="margin:0 5px; text-decoration:none; <?= $paginaAtual == $i ? 'font-weight: bold; color: red;' : '' ?>">
    <?= $i ?>
 </a>
-
-
-
                 <?php endif; ?>
             <?php endfor; ?>
         </div>

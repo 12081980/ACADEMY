@@ -92,6 +92,18 @@ class TreinosController
     }
 
     $usuario_id = $_SESSION['usuario']['id'] ?? null;
+    // 🔒 BLOQUEIO: não permitir novo treino se já existir um em andamento
+$treinoEmAndamento = $this->treinoModel->getTreinoEmAndamento($usuario_id);
+
+if ($treinoEmAndamento) {
+    echo json_encode([
+        'status' => 'bloqueado',
+        'mensagem' => 'Você já possui um treino em andamento.',
+        'redirect' => '/ACADEMY/public/treinos/em_andamento'
+    ]);
+    return;
+}
+
     if (!$usuario_id) {
         echo json_encode(['status' => 'erro', 'mensagem' => 'Usuário não autenticado.']);
         return;
@@ -273,15 +285,15 @@ public function treinosEnviados() // ou o nome que você usa
     $porPagina = 5;
     $offset = ($paginaAtual - 1) * $porPagina;
 
-    // buscar dados no model (ajuste nomes conforme seu modelo)
-    $treinos = $this->treinoModel->getTreinosEnviadosPaginado($usuarioId, $porPagina, $offset);
-    $total = $this->treinoModel->contarTreinosEnviados($usuarioId);
-    $totalPaginas = $total > 0 ? (int) ceil($total / $porPagina) : 1;
+    // // buscar dados no model (ajuste nomes conforme seu modelo)
+    // $treinos = $this->treinoModel->getTreinosEnviadosPaginado($usuarioId, $porPagina, $offset);
+    // $total = $this->treinoModel->contarTreinosEnviados($usuarioId);
+    // $totalPaginas = $total > 0 ? (int) ceil($total / $porPagina) : 1;
 
-    // passar para a view (dependendo do seu sistema; aqui atribui variáveis)
-    $this->viewData['treinos'] = $treinos;
-    $this->viewData['paginaAtual'] = $paginaAtual;
-    $this->viewData['totalPaginas'] = $totalPaginas;
+    // // passar para a view (dependendo do seu sistema; aqui atribui variáveis)
+    // $this->viewData['treinos'] = $treinos;
+    // $this->viewData['paginaAtual'] = $paginaAtual;
+    // $this->viewData['totalPaginas'] = $totalPaginas;
 
     // DEBUG opcional: grava o REQUEST_URI e $_GET para inspecionar
     // file_put_contents(__DIR__ . "/../logs/pag_debug.txt", date('Y-m-d H:i:s') . " URI: " . $_SERVER['REQUEST_URI'] . " GET: " . print_r($_GET, true) . PHP_EOL, FILE_APPEND);

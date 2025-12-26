@@ -175,12 +175,7 @@ class UsuarioModel
     }
 
     // busca todos os alunos (tipo = 'aluno')
-    public function buscarAlunos()
-    {
-        $stmt = $this->conn->prepare("SELECT id, nome, email FROM usuario WHERE tipo = '' ORDER BY nome ASC");
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
+ 
     public function buscarUsuarios()
     {
         $stmt = $this->conn->prepare("
@@ -201,8 +196,8 @@ public function buscaPorId($id)
 }
 public function buscarUsuariosPaginados($limit, $offset)
 {
-    $sql = "SELECT * FROM usuarios ORDER BY nome LIMIT :limit OFFSET :offset";
-    $stmt = $this->db->prepare($sql);
+    $sql = "SELECT * FROM usuario ORDER BY nome LIMIT :limit OFFSET :offset";
+    $stmt = $this->conn->prepare($sql);
     $stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
     $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
     $stmt->execute();
@@ -211,8 +206,8 @@ public function buscarUsuariosPaginados($limit, $offset)
 
 public function contarUsuarios()
 {
-    $sql = "SELECT COUNT(*) FROM usuarios";
-    return $this->db->query($sql)->fetchColumn();
+    $sql = "SELECT COUNT(*) FROM usuario";
+    return $this->conn->query($sql)->fetchColumn();
 }
 public function totalUsuarios() {
     $sql = $this->conn->query("SELECT COUNT(*) AS total FROM usuario");
@@ -223,7 +218,37 @@ public function totalInstrutores() {
     $sql = $this->conn->query("SELECT COUNT(*) AS total FROM usuario WHERE tipo = 'instrutor'");
     return $sql->fetch(PDO::FETCH_ASSOC)['total'];
 }
-
+public function buscarPaginado($limite, $offset)
+{
+    $sql = "SELECT * FROM usuario ORDER BY id DESC LIMIT :limite OFFSET :offset";
+    $stmt = $this->conn->prepare($sql);
+    $stmt->bindValue(':limite', (int)$limite, PDO::PARAM_INT);
+    $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+
+public function contarUsuario()
+{
+    return $this->conn->query("SELECT COUNT(*) FROM usuario")->fetchColumn();
+}
+   
+    public function atualizar(int $id, array $dados): bool
+    {
+        // ajuste o nome da tabela/colunas conforme o seu esquema
+        $sql = 'UPDATE usuarios SET nome = :nome, email = :email, tipo = :tipo WHERE id = :id';
+        $stmt = $this->conn->prepare($sql);
+
+        return $stmt->execute([
+            ':nome'  => $dados['nome'] ?? null,
+            ':email' => $dados['email'] ?? null,
+            ':tipo'  => $dados['tipo'] ?? null,
+            ':id'    => $id,
+        ]);
+    }
+
+    // ...existing code...
+}
+
 
 

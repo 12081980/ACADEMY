@@ -20,17 +20,17 @@ class NotificacaoModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function listarNaoLidas($usuarioId)
-    {
-        $stmt = $this->conn->prepare("
-            SELECT id, mensagem, data_envio 
-            FROM notificacoes 
-            WHERE usuario_id = :uid AND lida = 0 
-            ORDER BY data_envio DESC
-        ");
-        $stmt->execute([':uid' => $usuarioId]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
+   public function listarNaoLidas($usuarioId)
+{
+    $stmt = $this->conn->prepare("
+        SELECT COUNT(*) 
+        FROM notificacoes 
+        WHERE usuario_id = :uid AND lida = 0
+    ");
+    $stmt->execute([':uid' => $usuarioId]);
+    return (int) $stmt->fetchColumn();
+}
+
 
     public function marcarComoLida($id)
     {

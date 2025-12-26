@@ -156,35 +156,32 @@ class AdminController
 
         return $usuarios;
     }
-    public function dashboard()
-    {
-        try {
-            // Total de usuários cadastrados (tipo aluno)
-            $stmt = $this->conn->query("SELECT COUNT(*) AS total FROM usuario WHERE tipo = ''");
-            $totalUsuarios = $stmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
+   public function dashboard()
+{
+    try {
+        // Total de usuários cadastrados (tipo aluno)
+        $stmt = $this->conn->query("SELECT COUNT(*) AS total FROM usuario WHERE tipo = ''");
+        $totalUsuarios = $stmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
 
-             $model = new UsuarioModel($this->conn);
+        $model = new UsuarioModel($this->conn);
 
-    $dados = [
-        'usuarios_total'     => $model->totalUsuarios(),
-        // 'alunos_total'       => $model->totalAlunos(),
-        'instrutores_total'  => $model->totalInstrutores()
-    ];
+        $dados = [
+            'usuarios_total'     => $model->totalUsuarios(),
+            'instrutores_total'  => $model->totalInstrutores()
+        ];
 
-    require __DIR__ . '/../Views/admin/dashboard.php';
+        // Inclui a view corretamente
+        require __DIR__ . '/../Views/admin/dashboard.php';
 
-            
-
-            // Inclui a view corretamente
-            include __DIR__ . '/../views/admin/dashboard.php';
-        } catch (PDOException $e) {
-            echo "Erro ao carregar o dashboard: " . $e->getMessage();
-        }
+    } catch (PDOException $e) {
+        echo "Erro ao carregar o dashboard: " . $e->getMessage();
     }
+}
+
     public function editarUsuario($id)
     {
         $usuarioModel = new UsuarioModel();
-        $usuario = $usuarioModel->buscarPorId($id);
+        $usuario = $usuarioModel->getAll($id);
 
         if (!$usuario) {
             echo "<p>Usuário não encontrado.</p>";
@@ -245,15 +242,11 @@ public function lista_usuario()
     $totalUsuarios = $usuarioModel->contarUsuarios();
     $totalPaginas = ceil($totalUsuarios / $limit);
 
-    $this->view('admin/listaUsuario', [
-        'usuarios' => $usuarios,
-        'paginaAtual' => $paginaAtual,
-        'totalPaginas' => $totalPaginas
-    ]);
+    include __DIR__ . '/../Views/admin/listaUsuario.php';
 }
-public function acessos()
+public function acesso()
 {
-    $model = new AcessoModel();
+    $model = new AcessoModel($this->conn);
     $lista = $model->listar(); // retorna array
     require __DIR__ . '/../Views/admin/acesso.php';
 }

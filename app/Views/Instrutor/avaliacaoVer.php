@@ -78,7 +78,6 @@
 
 <a href="/ACADEMY/public/instrutor/avaliacaoPdf/<?= $avaliacao['id'] ?>" class="btn btn-secondary">📄 Gerar PDF</a>
 
-<a href="/ACADEMY/public/instrutor/avaliacaoEnviar/<?= $avaliacao['id'] ?>" class="btn btn-success">📨 Enviar ao
-    Usuário</a>
+
 
 </div>

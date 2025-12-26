@@ -45,3 +45,4 @@ class InstrutorModel
 
     return $treinos;
 }
+}

@@ -1,24 +1,22 @@
- <?php include __DIR__ . '/../templates/menuAdmin.php'; ?>   
 
+<?php include __DIR__ . '/../templates/menuAdmin.php'; ?>
+
+<div class="dashboard-container">
+
+    
+    
     <div class="cards">
         <div class="card users">
             <h2>👥 Usuários Cadastrados</h2>
             <p><?= $totalUsuarios ?? 0 ?></p>
-        </div>   
+        </div>
 
         <div class="card trainers">
-             <h2>  🏋️‍♂️ <strong>Instrutores</h2>
-            <p><?= $dados['instrutores_total'] ?></p>
+            <h2>🏋️‍♂️ Instrutores</h2>
+            <p><?= $dados['instrutores_total'] ?? 0 ?></p>
         </div>
-        
     </div>
-
-    <div class="actions">
-        <a href="/ACADEMY/public/admin/lista_usuario" class="button">👤 Gerenciar Usuários</a>
-        <a href="/ACADEMY/public/admin/sistema" class="button">⚙️ Configurações do Sistema</a>
-        <a href="/ACADEMY/public/admin/relatoriosAcesso" class="button">📑 Relatórios de Acesso</a>
-
-    </div>
-
+   
+</div>
 
 <?php include __DIR__ . '/../templates/footerAdmin.php'; ?>

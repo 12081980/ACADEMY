@@ -30,34 +30,42 @@ class NotificacoesController
     }
 
     public function ver()
-    {
-        session_start();
+{
+    session_start();
 
-        $notificacaoId = $_GET['id'] ?? null;
-        if (!$notificacaoId) {
-            header("Location: /ACADEMY/public/notificacoes");
-            exit;
-        }
+    if (!isset($_SESSION['usuario']['id'])) {
+        header("Location: /ACADEMY/public/login");
+        exit;
+    }
 
-        $notificacao = $this->model->getPorId($notificacaoId);
-        if (!$notificacao) {
-            header("Location: /ACADEMY/public/notificacoes");
-            exit;
-        }
+    $notificacaoId = $_GET['id'] ?? null;
+    $usuarioId = $_SESSION['usuario']['id'];
 
-        $this->model->marcarComoLida($notificacaoId);
-
-        // Caso a notificação esteja vinculada a um treino
-        if (!empty($notificacao['treino_id'])) {
-            $treinoModel = new TreinoModel($this->conn);
-            $treino = $treinoModel->getPorId($notificacao['treino_id']);
-            $exercicios = $treinoModel->getExerciciosDoTreino($notificacao['treino_id']);
-
-            include __DIR__ . '/../Views/notificacoes/ver_treino.php';
-            exit;
-        }
-
+    if (!$notificacaoId) {
         header("Location: /ACADEMY/public/notificacoes");
         exit;
     }
+
+    $notificacao = $this->model->getPorId($notificacaoId);
+
+    // 🔒 Segurança: notificação precisa ser do usuário logado
+    if (!$notificacao || $notificacao['usuario_id'] != $usuarioId) {
+        header("Location: /ACADEMY/public/notificacoes");
+        exit;
+    }
+
+    $this->model->marcarComoLida($notificacaoId);
+
+    if (!empty($notificacao['treino_id'])) {
+        $treinoModel = new TreinoModel($this->conn);
+        $treino = $treinoModel->getPorId($notificacao['treino_id']);
+        $exercicios = $treinoModel->getExerciciosDoTreino($notificacao['treino_id']);
+
+        include __DIR__ . '/../Views/notificacoes/ver_treino.php';
+        exit;
+    }
+
+    header("Location: /ACADEMY/public/notificacoes");
+    exit;
+}
 }

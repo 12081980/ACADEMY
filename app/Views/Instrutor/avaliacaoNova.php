@@ -104,10 +104,15 @@ if (session_status() === PHP_SESSION_NONE) {
             </fieldset>
 
             <fieldset>
-                <legend>Medidas Básicas</legend>
-                <label>Estatura (m):</label><input type="text" name="estatura">
-                <label>Peso (kg):</label><input type="text" name="peso">
-                <label>IMC (kg/m²):</label><input type="text" name="imc">
+                <label>Estatura (m):</label>
+<input type="text" name="estatura" id="estatura">
+
+<label>Peso (kg):</label>
+<input type="text" name="peso" id="peso">
+
+<label>IMC (kg/m²):</label>
+<input type="text" name="imc" id="imc" readonly>
+
             </fieldset>
 
             <fieldset>
@@ -117,7 +122,9 @@ if (session_status() === PHP_SESSION_NONE) {
                 <label>Axilar Média:</label><input type="text" name="axilar_media">
                 <label>Torácica:</label><input type="text" name="toracica">
                 <label>Supra-ilíaca:</label><input type="text" name="supra_iliaca">
-                <label>Abdominal:</label><input type="text" name="abdominal">
+                <label>Abdômen:</label>
+<input type="text" name="abdomen_med">
+
                 <label>Coxa:</label><input type="text" name="coxa">
             </fieldset>
 
@@ -150,10 +157,11 @@ if (session_status() === PHP_SESSION_NONE) {
                 <label>Nível de Atividade Física:</label>
                 <select name="nivel_atividade">
                     <option value="">Selecione</option>
-                    <option value="Sedentário">Sedentário</option>
-                    <option value="Leve">Leve</option>
-                    <option value="Moderado">Moderado</option>
-                    <option value="Intenso">Intenso</option>
+                   <option value="1">Sedentário</option>
+<option value="2">Leve</option>
+<option value="3">Moderado</option>
+<option value="4">Intenso</option>
+
                 </select>
                 <label>Taxa de Metabolismo Basal (kcal):</label><input type="text" name="tmb">
                 <label>Necessidade Energética Diária (kcal):</label><input type="text" name="necessidade_energetica">
@@ -202,5 +210,22 @@ if (session_status() === PHP_SESSION_NONE) {
 
     </script>
 </body>
+<script>
+    function calcularIMC() {
+        const peso = parseFloat(document.getElementById('peso').value.replace(',', '.'));
+        const estatura = parseFloat(document.getElementById('estatura').value.replace(',', '.'));
+        const imcInput = document.getElementById('imc');
+
+        if (peso > 0 && estatura > 0) {
+            const imc = peso / (estatura * estatura);
+            imcInput.value = imc.toFixed(2);
+        } else {
+            imcInput.value = '';
+        }
+    }
+
+    document.getElementById('peso').addEventListener('input', calcularIMC);
+    document.getElementById('estatura').addEventListener('input', calcularIMC);
+</script>
 
 </html>

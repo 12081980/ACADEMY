@@ -31,5 +31,10 @@ if (session_status() === PHP_SESSION_NONE)
 <?php endif; ?>
 <?php include __DIR__ . '/../templates/footerInstrutor.php'; ?>
 </body>
-
+<script>
+function toggleMenu() {
+    const menu = document.getElementById('menu');
+    menu.classList.toggle('open');
+}
+</script>
 </html>

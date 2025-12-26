@@ -192,11 +192,17 @@ document.querySelectorAll(".formTreino").forEach(form => {
 
             const resultado = await response.json();
 
-            if (resultado.status === "sucesso") {
-                window.location.href = resultado.redirect;
-            } else {
-                alert("❌ " + resultado.mensagem);
-            }
+          if (resultado.status === "sucesso") {
+    window.location.href = resultado.redirect;
+} 
+else if (resultado.status === "bloqueado") {
+    alert("⚠ " + resultado.mensagem);
+    window.location.href = resultado.redirect;
+} 
+else {
+    alert("❌ " + resultado.mensagem);
+}
+
 
         } catch (error) {
             alert("⚠ Erro ao conectar com o servidor.");

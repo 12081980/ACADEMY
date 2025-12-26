@@ -168,34 +168,34 @@ class InstrutorController
 }
 
    
-    public function editar_treino()
-    {
-        session_start();
-        $id = $_GET['id'] ?? null;
-        if (!$id) {
-            header("Location: /ACADEMY/public/instrutor/treinos_enviados");
-            exit;
-        }
+    // public function editar_treino()
+    // {
+    //     session_start();
+    //     $id = $_GET['id'] ?? null;
+    //     if (!$id) {
+    //         header("Location: /ACADEMY/public/instrutor/treinos_enviados");
+    //         exit;
+    //     }
 
-        $treinoModel = new TreinoModel();
-        $treino = $treinoModel->getTreinoPorId($id);
+    //     $treinoModel = new TreinoModel();
+    //     $treino = $treinoModel->getTreinoPorId($id);
 
-        include __DIR__ . '/../Views/instrutor/editar_treino.php';
-    }
+    //     include __DIR__ . '/../Views/instrutor/editar_treino.php';
+    // // }
 
-    public function atualizar_treino()
-    {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $id = $_POST['id'];
-            $tipo = $_POST['tipo'];
+    // public function atualizar_treino()
+    // {
+    //     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    //         $id = $_POST['id'];
+    //         $tipo = $_POST['tipo'];
 
-            $treinoModel = new TreinoModel();
-            $treinoModel->atualizarTreino($id, $tipo);
+    //         $treinoModel = new TreinoModel();
+    //         $treinoModel->atualizarTreino($id, $tipo);
 
-            header("Location: /ACADEMY/public/instrutor/treinos_enviados");
-            exit;
-        }
-    }
+    //         header("Location: /ACADEMY/public/instrutor/treinos_enviados");
+    //         exit;
+    //     }
+    // }
 
     public function excluir_treino()
     {
@@ -245,20 +245,23 @@ class InstrutorController
         include __DIR__ . '/../Views/instrutor/avaliacaoEscolher.php';
     }
 
-    public function salvarAvaliacao()
-    {
-        ini_set('display_errors', 1);
-        error_reporting(E_ALL);
+   public function salvarAvaliacao()
+{
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
 
+    header('Content-Type: application/json; charset=utf-8');
 
-        // garante que a sessão esteja iniciada antes de acessar $_SESSION
-        if (session_status() === PHP_SESSION_NONE)
-            session_start();
+    try {
+        if (!isset($_SESSION['usuario']['id'])) {
+            throw new Exception('Sessão expirada');
+        }
 
-        // usa a conexão injetada no controller
+        require_once __DIR__ . '/../Models/AvaliacaoModel.php';
+
         $avaliacaoModel = new AvaliacaoModel($this->conn);
 
-        // garantir que instrutor_id venha da sessão
         $_POST['instrutor_id'] = $_SESSION['usuario']['id'];
 
         $avaliacaoModel->salvar($_POST);
@@ -269,7 +272,15 @@ class InstrutorController
             'redirect' => '/ACADEMY/public/instrutor/avaliacoesSalvas'
         ]);
         exit;
+
+    } catch (Throwable $e) {
+        echo json_encode([
+            'status' => 'erro',
+            'mensagem' => $e->getMessage()
+        ]);
+        exit;
     }
+}
 
     public function avaliacoesSalvas()
     {
@@ -417,7 +428,7 @@ class InstrutorController
             'massa_gorda',
             'torax',
             'cintura',
-            'abdomen',
+            'abdomen_med',
             'quadril',
             'coxa_direita',
             'coxa_esquerda',
@@ -427,7 +438,7 @@ class InstrutorController
             'braco_esquerdo',
             'antebraco_direito',
             'antebraco_esquerdo',
-            'rcdq',
+            'rcq',
             'nivel_atividade',
             'tmb',
             'necessidade_energetica',
