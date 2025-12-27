@@ -1,4 +1,4 @@
- body {
+ /* body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
@@ -12,7 +12,71 @@
             padding: 6px 0;
             width: 100%;
 
-        }
+        } */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100vh;
+    
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    
+}
+header,
+.main-header,
+header.dashboard-header {
+    width: 100%;
+    max-width: 100%;
+     background: linear-gradient(90deg, rgba(188, 121, 143, 1.0), rgba(126, 45, 175, 1.0));;
+}
+@media (max-width: 768px) {
+    header,
+    .main-header,
+    header.dashboard-header {
+        padding: 10px 0;
+    }
+
+    header .container,
+    .main-header .container {
+        width: 100%;
+        padding: 0 15px;
+        box-sizing: border-box;
+    }
+}
+footer,
+.footer,
+.footerAdmin {
+    width: 100%;
+    max-width: 100%;
+    margin-top: auto;
+}
+@media (max-width: 768px) {
+    footer,
+    .footer,
+    .footerAdmin {
+        position: relative;
+        padding: 12px 0;
+        font-size: 0.85rem;
+    }
+}
+main,
+.mainAdmin {
+    flex: 1;
+    width: 100%;
+    box-sizing: border-box;
+}
+* {
+    box-sizing: border-box;
+}
+
+body {
+    overflow-x: hidden;
+}
+
 
         nav ul {
             display: flex;
@@ -231,12 +295,12 @@
     bottom: 1;
     width: 100%;
 }
-body {
+/* body {
     margin: 0;
     min-height: 80vh;
     display: flex;
     flex-direction: column;
-}
+} */
 
 main {
     flex: 1;
@@ -366,12 +430,12 @@ form button {
 
 
       
-html, body {
+/* html, body {
     height: 100%;
     margin: 0;
     display: flex;
     flex-direction: column;
-}
+} */
 
 /* O conteúdo ocupa o espaço livre */
 main {
@@ -1319,6 +1383,21 @@ nav ul li {
     display: flex;
     align-items: center;
     height: 100%;
+}
+
+.alert-success {
+    background: #d4edda;
+    color: #155724;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+}
+.alert-danger {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 15px;
 }
 
 /* Hover igual aos outros itens do menu */

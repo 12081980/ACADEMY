@@ -243,14 +243,14 @@ class AvaliacaoModel
         axilar_media = :axilar_media,
         toracica = :toracica,
         supra_iliaca = :supra_iliaca,
-        abdominal = :abdominal,
+      abdomen_med = :abdomen_med,
         coxa = :coxa,
         percentual_gordura = :percentual_gordura,
         massa_magra = :massa_magra,
         massa_gorda = :massa_gorda,
         torax = :torax,
         cintura = :cintura,
-        abdomen = :abdomen,
+       
         quadril = :quadril,
         coxa_direita = :coxa_direita,
         coxa_esquerda = :coxa_esquerda,
@@ -260,7 +260,7 @@ class AvaliacaoModel
         braco_esquerdo = :braco_esquerdo,
         antebraco_direito = :antebraco_direito,
         antebraco_esquerdo = :antebraco_esquerdo,
-        rcdq = :rcdq,
+        rcq = :rcq,
         nivel_atividade = :nivel_atividade,
         tmb = :tmb,
         necessidade_energetica = :necessidade_energetica,
@@ -278,7 +278,46 @@ class AvaliacaoModel
 
         $dados['id'] = $id;
 
-        return $stmt->execute($dados);
+       return $stmt->execute([
+    ':id' => $id,
+    ':estatura' => $dados['estatura'] ?? null,
+    ':peso' => $dados['peso'] ?? null,
+    ':imc' => $dados['imc'] ?? null,
+    ':subescapular' => $dados['subescapular'] ?? null,
+    ':triceps' => $dados['triceps'] ?? null,
+    ':axilar_media' => $dados['axilar_media'] ?? null,
+    ':toracica' => $dados['toracica'] ?? null,
+    ':supra_iliaca' => $dados['supra_iliaca'] ?? null,
+    ':abdomen_med' => $dados['abdomen_med'] ?? null,
+    ':coxa' => $dados['coxa'] ?? null,
+    ':percentual_gordura' => $dados['percentual_gordura'] ?? null,
+    ':massa_magra' => $dados['massa_magra'] ?? null,
+    ':massa_gorda' => $dados['massa_gorda'] ?? null,
+    ':torax' => $dados['torax'] ?? null,
+    ':cintura' => $dados['cintura'] ?? null,
+    ':quadril' => $dados['quadril'] ?? null,
+    ':coxa_direita' => $dados['coxa_direita'] ?? null,
+    ':coxa_esquerda' => $dados['coxa_esquerda'] ?? null,
+    ':perna_direita' => $dados['perna_direita'] ?? null,
+    ':perna_esquerda' => $dados['perna_esquerda'] ?? null,
+    ':braco_direito' => $dados['braco_direito'] ?? null,
+    ':braco_esquerdo' => $dados['braco_esquerdo'] ?? null,
+    ':antebraco_direito' => $dados['antebraco_direito'] ?? null,
+    ':antebraco_esquerdo' => $dados['antebraco_esquerdo'] ?? null,
+    ':rcq' => $dados['rcq'] ?? null,
+    ':nivel_atividade' => $dados['nivel_atividade'] ?? null,
+    ':tmb' => $dados['tmb'] ?? null,
+    ':necessidade_energetica' => $dados['necessidade_energetica'] ?? null,
+    ':cirurgia' => $dados['cirurgia'] ?? null,
+    ':patologia' => $dados['patologia'] ?? null,
+    ':medicamento' => $dados['medicamento'] ?? null,
+    ':fatores_risco' => $dados['fatores_risco'] ?? null,
+    ':atividade_atual' => $dados['atividade_atual'] ?? null,
+    ':rotina' => $dados['rotina'] ?? null,
+    ':objetivo' => $dados['objetivo'] ?? null,
+    ':observacoes' => $dados['observacoes'] ?? null,
+]);
+
     }
 
 }

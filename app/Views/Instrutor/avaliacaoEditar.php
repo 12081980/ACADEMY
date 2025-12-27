@@ -1,4 +1,15 @@
 <?php include __DIR__ . '/../templates/menuInstrutor.php'; ?>
+<?php if (!empty($_SESSION['sucesso'])): ?>
+    <div class="alert alert-success">
+        <?= $_SESSION['sucesso']; unset($_SESSION['sucesso']); ?>
+    </div>
+<?php endif; ?>
+
+<?php if (!empty($_SESSION['erro'])): ?>
+    <div class="alert alert-danger">
+        <?= $_SESSION['erro']; unset($_SESSION['erro']); ?>
+    </div>
+<?php endif; ?>
 
 <div class="container">
     <h2>✏ Editar Avaliação — <?= htmlspecialchars($avaliacao['nome_usuario']) ?></h2>
@@ -27,15 +38,14 @@
             "triceps",
             "axilar_media",
             "toracica",
-            "supra_iliaca",
-            "abdominal",
+            "supra_iliaca",           
             "coxa",
             "percentual_gordura",
             "massa_magra",
             "massa_gorda",
             "torax",
             "cintura",
-            "abdomen",
+            "abdomen_med",
             "quadril",
             "coxa_direita",
             "coxa_esquerda",
@@ -45,14 +55,16 @@
             "braco_esquerdo",
             "antebraco_direito",
             "antebraco_esquerdo",
-            "rcdq"
+            "rcq"
         ];
 
-        foreach ($campos as $campo):
-            ?>
-            <label><?= ucwords(str_replace("_", " ", $campo)) ?>:</label>
-            <input type="number" step="0.01" name="<?= $campo ?>" value="<?= $avaliacao[$campo] ?>">
-        <?php endforeach; ?>
+        foreach ($campos as $campo): ?>
+    <label><?= ucwords(str_replace("_", " ", $campo)) ?>:</label>
+    <input type="number" step="0.01"
+           name="<?= $campo ?>"
+           value="<?= htmlspecialchars($avaliacao[$campo] ?? '') ?>">
+<?php endforeach; ?>
+
 
         <hr>
 
@@ -107,7 +119,7 @@
 
     </form>
 </div>
-
+<?php include __DIR__ . '/../templates/footer.php'; ?>
 <style>
     .container {
         max-width: 900px;

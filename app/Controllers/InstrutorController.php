@@ -492,44 +492,44 @@ class InstrutorController
 
 
 
-    public function avaliacaoEditar($id)
-    {
-        if (session_status() === PHP_SESSION_NONE)
-            session_start();
+    // public function avaliacaoEditar($id)
+    // {
+    //     if (session_status() === PHP_SESSION_NONE)
+    //         session_start();
 
-        require_once __DIR__ . '/../Models/AvaliacaoModel.php';
-        $model = new AvaliacaoModel($this->conn);
+    //     require_once __DIR__ . '/../Models/AvaliacaoModel.php';
+    //     $model = new AvaliacaoModel($this->conn);
 
-        $avaliacao = $model->buscarPorId($id);
+    //     $avaliacao = $model->buscarPorId($id);
 
-        if (!$avaliacao) {
-            echo "Avaliação não encontrada!";
-            return;
+    //     if (!$avaliacao) {
+    //         echo "Avaliação não encontrada!";
+    //         return;
+    //     }
+
+    //     require __DIR__ . '/../Views/Instrutor/avaliacaoEditar.php';
+    // }
+ public function avaliacaoEditar($id)
+{
+    $avaliacaoModel = new AvaliacaoModel($this->conn);
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+        $dados = $_POST;
+
+        $ok = $avaliacaoModel->atualizar($id, $dados);
+
+        if ($ok) {
+            $_SESSION['sucesso'] = 'Avaliação editada com sucesso!';
+            header("Location: /ACADEMY/public/instrutor/avaliacaoVer/$id");
+            exit;
+        } else {
+            $_SESSION['erro'] = 'Erro ao atualizar avaliação.';
         }
-
-        require __DIR__ . '/../Views/Instrutor/avaliacaoEditar.php';
     }
-    //     public function avaliacaoAtualizar($id)
-//     {
-//         if (session_status() === PHP_SESSION_NONE)
-//             session_start();
 
-    //         require_once __DIR__ . '/../Models/AvaliacaoModel.php';
-//         $model = new AvaliacaoModel($this->conn);
+    $avaliacao = $avaliacaoModel->buscarPorId($id);
+    include __DIR__ . '/../Views/Instrutor/avaliacaoEditar.php';
+}
 
-    //         $dados = $_POST;
-
-    //         $ok = $model->atualizar($id, $dados);
-
-    //         if ($ok) {
-//             $_SESSION['msg_sucesso'] = "Avaliação atualizada com sucesso!";
-//         } else {
-//             $_SESSION['msg_erro'] = "Erro ao atualizar!";
-//         }
-
-    //         header("Location: /ACADEMY/public/instrutor/avaliacaoVer/$id");
-//         exit;
-//     }
-
-    //   // ... outros métodos ...
 }

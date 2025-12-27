@@ -9,56 +9,7 @@ if (session_status() === PHP_SESSION_NONE)
 <html lang="pt-BR">
 
 <head>
-    <!-- <meta charset="UTF-8">
-    <style>
-        body {
-            font-family: Arial;
-            margin: 20px;
-        }
-
-        form {
-            background: #f9f9f9;
-            padding: 20px;
-            border-radius: 8px;
-            max-width: 800px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-
-        th,
-        td {
-            border: 1px solid #ccc;
-            padding: 8px;
-            text-align: left;
-        }
-
-        th {
-            background: #eee;
-        }
-
-        button,
-        .btn {
-            background-color: #007bff;
-            color: white;
-            padding: 8px 14px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .add-btn {
-            margin-top: 10px;
-            background-color: #28a745;
-        }
-
-        .add-btn:hover {
-            background-color: #218838;
-        }
-    </style> -->
+    
 </head>
 
 <body>
@@ -118,8 +69,8 @@ if (session_status() === PHP_SESSION_NONE)
             </tbody>
         </table>
 
-        <button type="button" class="add-btn" id="add-exercicio">+ Adicionar Exercício</button>
-        <br><br>
+        <!-- <button type="button" class="add-btn" id="add-exercicio">+ Adicionar Exercício</button>
+        <br><br> -->
         <button type="submit">Enviar Treino</button>
 
     </form>
@@ -210,3 +161,4 @@ if (session_status() === PHP_SESSION_NONE)
             }
         });
     </script>
+    <?php include __DIR__ . '/../templates/footer.php'; ?>

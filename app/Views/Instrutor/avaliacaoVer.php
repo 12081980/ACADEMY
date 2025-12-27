@@ -1,7 +1,6 @@
 <?php include __DIR__ . '/../templates/menuInstrutor.php'; ?>
 
-<div class="container">
-    <h2>📄 Detalhes da Avaliação</h2>
+<div class="container">   
 
     <?php if (!$avaliacao): ?>
         <p style="color:red;">Avaliação não encontrada!</p>

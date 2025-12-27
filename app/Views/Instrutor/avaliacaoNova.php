@@ -104,14 +104,15 @@ if (session_status() === PHP_SESSION_NONE) {
             </fieldset>
 
             <fieldset>
-                <label>Estatura (m):</label>
-<input type="text" name="estatura" id="estatura">
-
-<label>Peso (kg):</label>
+ <label>Peso (kg):</label>
 <input type="text" name="peso" id="peso">
+
+<label>Estatura (m):</label>
+<input type="text" name="estatura" id="estatura">
 
 <label>IMC (kg/m²):</label>
 <input type="text" name="imc" id="imc" readonly>
+
 
             </fieldset>
 
@@ -189,6 +190,7 @@ if (session_status() === PHP_SESSION_NONE) {
             <button type="submit" class="btn-enviar">Salvar Avaliação</button>
         </form>
     </div>
+    <?php include __DIR__ . '/../templates/footer.php'; ?>
     <script>
         document.getElementById('formAvaliacao').addEventListener('submit', function (e) {
             e.preventDefault();
@@ -209,23 +211,38 @@ if (session_status() === PHP_SESSION_NONE) {
         });
 
     </script>
-</body>
-<script>
-    function calcularIMC() {
-        const peso = parseFloat(document.getElementById('peso').value.replace(',', '.'));
-        const estatura = parseFloat(document.getElementById('estatura').value.replace(',', '.'));
-        const imcInput = document.getElementById('imc');
+   <script>
+document.addEventListener('DOMContentLoaded', function () {
 
-        if (peso > 0 && estatura > 0) {
-            const imc = peso / (estatura * estatura);
-            imcInput.value = imc.toFixed(2);
-        } else {
+    const pesoInput = document.getElementById('peso');
+    const estaturaInput = document.getElementById('estatura');
+    const imcInput = document.getElementById('imc');
+
+    function calcularIMC() {
+        let peso = parseFloat(pesoInput.value.replace(',', '.'));
+        let estatura = parseFloat(estaturaInput.value.replace(',', '.'));
+
+        if (isNaN(peso) || isNaN(estatura) || peso <= 0 || estatura <= 0) {
             imcInput.value = '';
+            return;
         }
+
+        // 👉 Se a estatura for maior que 3, considera cm e converte para metros
+        if (estatura > 3) {
+            estatura = estatura / 100;
+        }
+
+        const imc = peso / (estatura * estatura);
+        imcInput.value = imc.toFixed(2);
     }
 
-    document.getElementById('peso').addEventListener('input', calcularIMC);
-    document.getElementById('estatura').addEventListener('input', calcularIMC);
+    pesoInput.addEventListener('input', calcularIMC);
+    estaturaInput.addEventListener('input', calcularIMC);
+
+});
 </script>
+
+
+</body>
 
 </html>
