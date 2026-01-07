@@ -8,19 +8,15 @@ class AuthController
 {
     private $conn;
 
-    public function __construct($conn = '')
-    {
-        if ($conn) {
-            $this->conn = $conn;
-        } else {
-            require __DIR__ . '/../../core/conn.php';
-            $this->conn = $conn ?? (isset($conn) ? $conn : '');
-        }
+   public function __construct(PDO $conn)
+{
+    $this->conn = $conn;
 
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
     }
+}
+
 
 
     public function login()

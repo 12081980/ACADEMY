@@ -236,7 +236,7 @@ public function contarUsuario()
     public function atualizar(int $id, array $dados): bool
     {
         // ajuste o nome da tabela/colunas conforme o seu esquema
-        $sql = 'UPDATE usuarios SET nome = :nome, email = :email, tipo = :tipo WHERE id = :id';
+        $sql = 'UPDATE usuario SET nome = :nome, email = :email, tipo = :tipo WHERE id = :id';
         $stmt = $this->conn->prepare($sql);
 
         return $stmt->execute([

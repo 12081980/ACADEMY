@@ -1,7 +1,11 @@
 <?php include __DIR__ . '/../templates/menuAdmin.php'; ?>
-<div class="container">  
-    <?php if (!empty($lista) && is_array($lista)): ?>
-        <table border="1" cellpadding="8" cellspacing="0">
+
+<div class="container">
+
+    <h2>📊 Relatório de Acessos</h2>
+
+    <?php if (!empty($lista)): ?>
+        <table class="tabela">
             <thead>
                 <tr>
                     <th>Usuário</th>
@@ -19,15 +23,14 @@
                         <td><?= htmlspecialchars($log['tipo_usuario']) ?></td>
                         <td><?= htmlspecialchars($log['ip']) ?></td>
                         <td><?= htmlspecialchars($log['navegador']) ?></td>
-                        <td><?= htmlspecialchars(date('d/m/Y', strtotime($log['data_acesso']))) ?></td>
+                        <td><?= date('d/m/Y', strtotime($log['data_acesso'])) ?></td>
                         <td><?= htmlspecialchars($log['hora_acesso']) ?></td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
         </table>
     <?php else: ?>
-        <p style="margin-top:15px; font-weight:bold; color:#555;">
-            ⚠ Nenhum acesso registrado ainda.
-        </p>
+        <p>⚠ Nenhum acesso registrado.</p>
     <?php endif; ?>
+
 </div>

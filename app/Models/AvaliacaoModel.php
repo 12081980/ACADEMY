@@ -319,5 +319,9 @@ class AvaliacaoModel
 ]);
 
     }
+public function getLastId()
+{
+    return $this->conn->lastInsertId();
+}
 
 }

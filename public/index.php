@@ -149,7 +149,15 @@ $router->addRoute('/register', 'AuthController@register', ['GET', 'POST']);
 $router->addRoute('/instrutor/enviar', 'InstrutorController@enviarTreinoForm', ['GET']);
 $router->addRoute('/instrutor/enviar_treino', 'InstrutorController@enviarTreino', ['POST']);
 
-
+$router->addRoute(
+    '/usuario/avaliacaoVer/{id}',
+    'UsuarioController@avaliacaoVer',
+    ['GET']
+);
+$router->addRoute(
+    '/usuario/avaliacaoVer/{id}',
+    'UsuarioController@avaliacaoVer'
+);
 
 // ==================================================
 // ✅ ROTA FINAL: DESPACHA A REQUISIÇÃO

@@ -10,6 +10,7 @@ if (session_status() === PHP_SESSION_NONE)
 <p>Bem-vindo, <strong><?= htmlspecialchars($instrutorNome ?? 'Instrutor') ?></strong>!</p>
 
 <?php if (!empty($usuarios)): ?>
+    <div class="container">
     <table>
         <tr>
             <th>Nome</th>
@@ -20,12 +21,16 @@ if (session_status() === PHP_SESSION_NONE)
             <tr>
                 <td><?= htmlspecialchars($u['nome']) ?></td>
                 <td><?= htmlspecialchars($u['email']) ?></td>
-                <td>
-                    <a href="/ACADEMY/public/instrutor/enviar?usuario_id=<?= $u['id'] ?>" class="btn">Enviar Treino</a>
-                </td>
+                <td class="acao">
+    <a class="btn btn-enviar" href="/ACADEMY/public/instrutor/enviar?usuario_id=<?= $u['id'] ?>">
+        Enviar Treino
+    </a>
+</td>
+
             </tr>
         <?php endforeach; ?>
     </table>
+    </div>
 <?php else: ?>
     <p>Nenhum aluno cadastrado.</p>
 <?php endif; ?>

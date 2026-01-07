@@ -71,7 +71,10 @@ if (session_status() === PHP_SESSION_NONE)
 
         <!-- <button type="button" class="add-btn" id="add-exercicio">+ Adicionar Exercício</button>
         <br><br> -->
-        <button type="submit">Enviar Treino</button>
+        <button type="submit" class="btn btn-primary btn-enviar">
+    Enviar Treino
+</button>
+
 
     </form>
 

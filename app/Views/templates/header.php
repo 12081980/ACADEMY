@@ -12,39 +12,51 @@
 
 <body>
     <?php
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
-    }
-    ?>
-<?php
-$mostrarVoltar = false; // evita warning
-?>
-<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+$notificacoes = [];
 $novas = 0;
 
 if (isset($_SESSION['usuario']['id'])) {
     require_once __DIR__ . '/../../Models/NotificacaoModel.php';
+
     $notificacaoModel = new NotificacaoModel($GLOBALS['conn']);
+
+    $notificacoes = $notificacaoModel->listarPorUsuario($_SESSION['usuario']['id']);
     $novas = $notificacaoModel->listarNaoLidas($_SESSION['usuario']['id']);
 }
 ?>
 
+<?php
+$mostrarVoltar = false; // evita warning
+?>
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
+$novas = 0;
 
+if (isset($_SESSION['usuario']['id'])) {
+    require_once __DIR__ . '/../../Models/NotificacaoModel.php';
 
-
- <header>
-    <div class="container">
-        <nav>
+    $notificacaoModel = new NotificacaoModel($GLOBALS['conn']);
+    $novas = $notificacaoModel->listarNaoLidas($_SESSION['usuario']['id']);
+}
+?>
+ <header class="site-header">
+    <nav class="container">
             <button class="hamburger" onclick="toggleMenu()" aria-label="Menu">☰</button>
 
             <ul id="menu">
                 <li><a href="/ACADEMY/public/home">INÍCIO</a></li>
 
                 <?php if (isset($_SESSION['usuario'])): ?>
-                    <li><a href="/ACADEMY/public/treinos/realizados">📋 TREINOS REALIZADOS</a></li>
-                    <li><a href="/ACADEMY/public/treinos/em_andamento">📊 TREINOS EM ANDAMENTO</a></li>
-                    <li><a href="/ACADEMY/public/treinos/graficos">📊 GRÁFICO DE EVOLUÇÃO</a></li>
+                    <li><a href="/ACADEMY/public/treinos/realizados"> TREINOS REALIZADOS</a></li>
+                    <li><a href="/ACADEMY/public/treinos/em_andamento"> TREINOS EM ANDAMENTO</a></li>
+                    <li><a href="/ACADEMY/public/treinos/graficos"> GRÁFICO DE EVOLUÇÃO</a></li>
 <?php if ($novas > 0): ?>
     <li>
         <a href="/ACADEMY/public/notificacoes" class="menu-notificacao">
@@ -77,8 +89,6 @@ if (isset($_SESSION['usuario']['id'])) {
         </nav>
     </div>
 </header>
-
-
     <main>
         <div class="containerBody">
             <!-- Modal Login -->

@@ -1,3 +1,9 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+?>
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -9,35 +15,46 @@
 
 <body>
 
-<header>
-    <div class="container">
-        <nav>
+<header class="site-header">
+    <nav class="container">
 
-            <!-- BOTÃO HAMBURGUER -->
-            <button class="hamburger" onclick="toggleMenu()" aria-label="Menu">☰</button>
+        <!-- BOTÃO HAMBURGER -->
+        <button class="hamburger" onclick="toggleMenu()" aria-label="Menu">☰</button>
 
-            <!-- MENU -->
-            <ul id="menu">
-                <li><a href="/ACADEMY/public/admin/dashboard">🏠 Dashboard</a></li>
-                <li><a href="/ACADEMY/public/admin/lista_usuario">👥 Usuários</a></li>
-                <li><a href="/ACADEMY/public/admin/relatoriosAcesso">📊 Relatórios de Acesso</a></li>
+        <!-- MENU -->
+        <ul id="menu">
+            <li>
+                <a href="/ACADEMY/public/admin/dashboard">🏠 DASHBOARD</a>
+            </li>
 
-                <li>
-                    <form action="/ACADEMY/public/auth/logout" method="post">
-                        <button type="submit" class="menu-link btn-logout">
-                            🚪 Sair
-                        </button>
-                    </form>
-                </li>
-            </ul>
+            <li>
+                <a href="/ACADEMY/public/admin/lista_usuario">👥 USUÁRIOS</a>
+            </li>
 
-        </nav>
-    </div>
+            <li>
+                <a href="/ACADEMY/public/admin/relatoriosAcesso">📊 RELATÓRIOS</a>
+            </li>
+
+            <li class="menu-perfil">
+                <a href="#">
+                    👋 <?= htmlspecialchars(explode(' ', trim($_SESSION['usuario']['nome']))[0] ?? 'Admin') ?>
+                </a>
+            </li>
+
+            <li>
+                <form action="/ACADEMY/public/auth/logout" method="post">
+                    <button type="submit" class="menu-link btn-logout">
+                        🚪 SAIR
+                    </button>
+                </form>
+            </li>
+        </ul>
+
+    </nav>
 </header>
+
 <script>
 function toggleMenu() {
     document.getElementById('menu').classList.toggle('open');
 }
 </script>
-
-</body>

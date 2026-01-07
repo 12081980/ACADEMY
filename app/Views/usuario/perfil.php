@@ -1,6 +1,16 @@
 <?php
 include __DIR__ . '/../../Views/templates/header.php';
 ?>
+<?php if (!empty($_SESSION['mensagem'])): ?>
+    <div class="alert alert-<?= $_SESSION['tipo_mensagem'] ?? 'info' ?>">
+        <?= $_SESSION['mensagem'] ?>
+    </div>
+
+    <?php
+        unset($_SESSION['mensagem']);
+        unset($_SESSION['tipo_mensagem']);
+    ?>
+<?php endif; ?>
 
 
 <div class="perfil">
@@ -69,10 +79,27 @@ include __DIR__ . '/../../Views/templates/header.php';
                     value="<?= htmlspecialchars($_SESSION['usuario']['numero'] ?? '') ?>">
             </div>
 
-            <div class="botoesPerfil">
-                <button type="submit" class="btn btn-success">Salvar Alterações</button>
-                <button type="button" id="btnExcluirPerfil" class="btn btn-danger">Excluir Perfil</button>
-            </div>
+           <div class="botoesPerfil">
+
+  <button
+    type="button"
+    class="btn btn-info"
+    onclick="window.location.href='/ACADEMY/public/usuario/avaliacaoVer/<?=$_SESSION['usuario']['id']?>'">
+    Minhas Avaliações
+</button>
+
+
+    <button type="submit" class="btn btn-success">
+        Salvar Alterações
+    </button>
+
+    
+
+    <button type="button" id="btnExcluirPerfil" class="btn btn-danger">
+        Excluir Perfil
+    </button>
+</div>
+
 
         </form>
     </div>

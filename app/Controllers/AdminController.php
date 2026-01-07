@@ -1,5 +1,8 @@
 <?php
+require_once __DIR__ . '/../../core/conn.php';
 require_once __DIR__ . '/../Models/UsuarioModel.php';
+require_once __DIR__ . '/../Models/AcessoModel.php'; // ✅ ESSENCIAL
+
 class AdminController
 {
     private $conn;
@@ -13,90 +16,31 @@ class AdminController
             $this->conn = $conn;
         }
     }
+    private function verificarAdmin()
+{
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+
+    if (
+        !isset($_SESSION['usuario']) ||
+        ($_SESSION['usuario']['tipo'] ?? '') !== 'admin'
+    ) {
+        header("Location: /ACADEMY/public/login");
+        exit;
+    }
+}
+
 
     /**
      * Lista todos os alunos com seus últimos treinos (se houver)
      */
-    public function listaUsuarios()
-    {
-        // Busca todos os usuários do banco
-        $stmt = $this->conn->prepare("
-        SELECT id, nome, email
-        FROM usuario
-        ORDER BY nome ASC
-    ");
-        $stmt->execute();
-        $usuariosDb = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        $usuarios = [];
-
-        foreach ($usuariosDb as $user) {
-            $uid = $user['id'];
-
-            // Inicializa o array do usuário
-            $usuarios[$uid] = [
-                'nome' => $user['nome'],
-                'email' => $user['email'],
-                'treinos' => []
-            ];
-
-            // Busca treinos do usuário
-            $stmtTreinos = $this->conn->prepare("
-            SELECT 
-                t.id AS treino_id,
-                t.nome AS treino_nome,
-                t.data_inicio,
-                t.data_fim,
-                e.nome AS exercicio_nome,
-                te.series,
-                te.repeticoes,
-                te.carga
-            FROM treino t
-            LEFT JOIN treino_exercicio te ON t.id = te.treino_id
-            LEFT JOIN exercicio e ON e.nome = te.nome_exercicio
- = e.id
-            WHERE t.usuario_id = :uid
-            ORDER BY t.data_inicio DESC
-        ");
-            $stmtTreinos->execute([':uid' => $uid]);
-            $treinosDb = $stmtTreinos->fetchAll(PDO::FETCH_ASSOC);
-
-            // Agrupa treinos e exercícios
-            foreach ($treinosDb as $row) {
-                $tid = $row['treino_id'];
-
-                if (!isset($usuarios[$uid]['treinos'][$tid])) {
-                    $usuarios[$uid]['treinos'][$tid] = [
-                        'nome' => $row['treino_nome'],
-                        'data_inicio' => $row['data_inicio'],
-                        'data_fim' => $row['data_fim'],
-                        'exercicios' => []
-                    ];
-                }
-
-                if ($row['exercicio_nome']) {
-                    $usuarios[$uid]['treinos'][$tid]['exercicios'][] = [
-                        'nome' => $row['exercicio_nome'],
-                        'series' => $row['series'],
-                        'repeticoes' => $row['repeticoes'],
-                        'carga' => $row['carga']
-                    ];
-                }
-            }
-        }
-
-        include __DIR__ . '/../views/admin/lista_usuario.php';
-    }
-
-    /**
-     * Exclui um usuário (apenas se for aluno)
-     *
-     * (Removed: use the model-based excluirUsuario method defined later in this class
-     * to avoid duplicate method declarations.)
-     */
+   
     public function excluirUsuario($id)
     {
-        $usuarioModel = new UsuarioModel();
+         $this->verificarAdmin();
+      $usuarioModel = new UsuarioModel($this->conn);
+
         $usuarioModel->excluirUsuario($id);
     }
     /**
@@ -134,6 +78,7 @@ class AdminController
      */
     public function buscarUsuariosComTreinosAgrupados()
     {
+         $this->verificarAdmin();
         $sql = "SELECT id, nome, email FROM usuario WHERE tipo = 'aluno' ORDER BY nome ASC";
         $stmt = $this->conn->query($sql);
         $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -158,9 +103,10 @@ class AdminController
     }
    public function dashboard()
 {
+     $this->verificarAdmin();
     try {
         // Total de usuários cadastrados (tipo aluno)
-        $stmt = $this->conn->query("SELECT COUNT(*) AS total FROM usuario WHERE tipo = ''");
+        $stmt = $this->conn->query("SELECT COUNT(*) AS total FROM usuario WHERE tipo = 'usuario'");
         $totalUsuarios = $stmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
 
         $model = new UsuarioModel($this->conn);
@@ -180,7 +126,8 @@ class AdminController
 
     public function editarUsuario($id)
     {
-        $usuarioModel = new UsuarioModel();
+         $this->verificarAdmin();
+        $usuarioModel = new UsuarioModel($this->conn);
         $usuario = $usuarioModel->getAll($id);
 
         if (!$usuario) {
@@ -193,7 +140,8 @@ class AdminController
 
     public function atualizarUsuario($id)
     {
-        $usuarioModel = new UsuarioModel();
+         $this->verificarAdmin();
+        $usuarioModel = new UsuarioModel($this->conn);
 
         $dados = [
             'nome' => $_POST['nome'] ?? '',
@@ -207,31 +155,13 @@ class AdminController
         header("Location: /ACADEMY/public/admin/lista_usuarios");
         exit;
     }
-public function relatoriosAcesso()
+
+
+public function listaUsuarios()
 {
-    if (session_status() === PHP_SESSION_NONE) session_start();
+     $this->verificarAdmin();
+   $usuarioModel = new UsuarioModel($this->conn);
 
-    if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['tipo'] !== 'admin') {
-        header("Location: /ACADEMY/public/login");
-        exit;
-    }
-
-    $stmt = $this->conn->query("
-        SELECT la.*, u.nome 
-        FROM acessos la
-        JOIN usuario u ON la.usuario_id = u.id
-        ORDER BY la.data_acesso DESC
-        LIMIT 200
-    ");
-
-   $lista = $stmt->fetchAll(PDO::FETCH_ASSOC);
-require_once __DIR__ . '/../Views/admin/acesso.php';
-
-}
-
-public function lista_usuario()
-{
-    $usuarioModel = new UsuarioModel();
 
     // Paginação
     $paginaAtual = isset($_GET['pagina']) ? (int) $_GET['pagina'] : 1;
@@ -242,20 +172,23 @@ public function lista_usuario()
     $totalUsuarios = $usuarioModel->contarUsuarios();
     $totalPaginas = ceil($totalUsuarios / $limit);
 
-    include __DIR__ . '/../Views/admin/listaUsuario.php';
+    include __DIR__ . '/../Views/admin/lista_usuario.php';
 }
 public function acesso()
 {
+     $this->verificarAdmin();
     $model = new AcessoModel($this->conn);
     $lista = $model->listar(); // retorna array
     require __DIR__ . '/../Views/admin/acesso.php';
 }
-// public function acesso()
-// {
-//     $model = new LogAcessoModel();
-//     $lista = $model->listar();
 
-//     include __DIR__ . "/../Views/admin/acesso.php";
-// }
+ public function relatoriosAcesso()
+    {
+        $this->verificarAdmin();
 
+        $model = new AcessoModel($this->conn);
+        $lista = $model->listar();
+
+        require __DIR__ . '/../Views/admin/acesso.php';
+    }
 }

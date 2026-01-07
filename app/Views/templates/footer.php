@@ -5,15 +5,11 @@
 </main>
 
 <footer class="footer">
-    <p>&copy; 2025 E@Silva. Todos os direitos reservados.</p>
-
-    <!-- <?php
-    $uriAtual = $_SERVER['REQUEST_URI'];
-    if ($uriAtual !== '/ACADEMY/public/' && $uriAtual !== '/ACADEMY/public/home') :
-    ?>
-        
-    <?php endif; ?> -->
+    <div class="footer-inner">
+        <p>&copy; 2025 E@Silva.</p>
+    </div>
 </footer>
+
 
 </body>
 <script>

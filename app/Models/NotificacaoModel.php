@@ -8,17 +8,18 @@ class NotificacaoModel
         $this->conn = $conn;
     }
 
-    public function listarPorUsuario($usuarioId)
-    {
-        $stmt = $this->conn->prepare("
-            SELECT id, mensagem, treino_id, data_envio, lida 
-            FROM notificacoes 
-            WHERE usuario_id = :uid 
-            ORDER BY data_envio DESC
-        ");
-        $stmt->execute([':uid' => $usuarioId]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
+   public function listarPorUsuario($usuarioId)
+{
+    $stmt = $this->conn->prepare("
+        SELECT id, mensagem, treino_id, avaliacao_id, data_envio, lida 
+        FROM notificacoes 
+        WHERE usuario_id = :uid 
+        ORDER BY data_envio DESC
+    ");
+    $stmt->execute([':uid' => $usuarioId]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
 
    public function listarNaoLidas($usuarioId)
 {
@@ -75,4 +76,21 @@ class NotificacaoModel
         $stmt = $this->conn->prepare($sql);
         $stmt->execute([':id' => $id]);
     }
+    public function enviarAvaliacao($usuarioId, $avaliacaoId, $mensagem)
+{
+    $sql = "
+        INSERT INTO notificacoes 
+        (usuario_id, avaliacao_id, mensagem, data_envio, lida)
+        VALUES (:uid, :aid, :msg, NOW(), 0)
+    ";
+
+    $stmt = $this->conn->prepare($sql);
+    $stmt->execute([
+        ':uid' => $usuarioId,
+        ':aid' => $avaliacaoId,
+        ':msg' => $mensagem
+    ]);
 }
+
+}
+

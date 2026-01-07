@@ -31,7 +31,7 @@ class UsuarioController
 
     public function excluir($id)
     {
-        if ($this->usuarioModel->delete($id)) {
+        if ($this->usuarioModel->excluirUsuario($id)) {
             $_SESSION['mensagem'] = "Usuário excluído com sucesso!";
         } else {
             $_SESSION['mensagem'] = "Erro ao excluir usuário!";
@@ -129,5 +129,65 @@ class UsuarioController
         header('Location: /ACADEMY/public');
         exit;
     }
+public function abrirNotificacao($id)
+{
+    session_start();
+
+    require_once __DIR__ . '/../Models/NotificacaoModel.php';
+    $model = new NotificacaoModel($this->conn);
+
+    $notificacao = $model->getPorId($id);
+
+    if (!$notificacao || $notificacao['usuario_id'] != $_SESSION['usuario']['id']) {
+        header("Location: /ACADEMY/public");
+        exit;
+    }
+
+    $model->marcarComoLida($id);
+
+    // Redireciona conforme tipo
+    if ($notificacao['avaliacao_id']) {
+        header("Location: /ACADEMY/public/usuario/avaliacao/" . $notificacao['avaliacao_id']);
+    } elseif ($notificacao['treino_id']) {
+        header("Location: /ACADEMY/public/usuario/treino/" . $notificacao['treino_id']);
+    }
+
+    exit;
+}
+public function avaliacaoVer($idRota = null)
+{
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+
+    // usuário precisa estar logado
+    if (!isset($_SESSION['usuario']['id'])) {
+        header("Location: /ACADEMY/public/login");
+        exit;
+    }
+
+    $id = $idRota ?? ($_GET['id'] ?? null);
+
+    if (!$id) {
+        header("Location: /ACADEMY/public/notificacoes");
+        exit;
+    }
+
+    require_once __DIR__ . '/../Models/AvaliacaoModel.php';
+    $avaliacaoModel = new AvaliacaoModel($this->conn);
+
+    $avaliacao = $avaliacaoModel->buscarPorId($id);
+
+    // garante que a avaliação pertence ao usuário logado
+    if (
+        !$avaliacao ||
+        $avaliacao['usuario_id'] != $_SESSION['usuario']['id']
+    ) {
+        header("Location: /ACADEMY/public/notificacoes");
+        exit;
+    }
+
+    include __DIR__ . '/../Views/usuario/avaliacaoVer.php';
+}
 
 }

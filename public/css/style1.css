@@ -1,0 +1,523 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    min-height: 100vh;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f8f9fa;
+    color: #333;
+    overflow-x: hidden;
+}
+
+main,
+.mainAdmin {
+    flex: 1;
+    width: 100%;
+    padding: 20px;
+}
+
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 16px;
+}
+
+
+header,
+.main-header,
+header.dashboard-header {
+    width: 100%;
+    background: linear-gradient(90deg, #bc798f, #7e2daf);
+    color: #fff;
+}
+
+.main-header .container,
+header.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+}
+
+
+nav {
+    position: relative;
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+nav a,
+.menu-link,
+.btn-logout {
+    background: none;
+    border: none;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 8px 12px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+}
+
+.hamburger {
+    display: none;
+    font-size: 28px;
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+}
+
+
+@media (max-width: 768px) {
+
+    .hamburger {
+        display: block;
+    }
+
+    nav ul {
+        display: none;
+        flex-direction: column;
+        background: linear-gradient(90deg, #bc798f, #7e2daf);
+        position: absolute;
+        top: 60px;
+        left: 0;
+        width: 100vw;
+        padding: 15px 0;
+        z-index: 1000;
+    }
+
+    nav ul.open {
+        display: flex;
+    }
+
+    nav ul li {
+        text-align: center;
+        padding: 10px 0;
+    }
+}
+
+
+.btn,
+.button {
+    padding: 10px 20px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    background: linear-gradient(90deg, #bc798f, #7e2daf);
+    color: #fff;
+}
+
+.btn-success { background: #4CAF50; }
+.btn-danger  { background: #f44336; }
+
+
+.cards,
+.treinos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.card,
+.treino-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+}
+
+th, td {
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+th {
+    background: linear-gradient(90deg, #bc798f, #7e2daf);
+    color: #fff;
+}
+
+tr:nth-child(even) {
+    background: #f2f2f2;
+}
+
+
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.6);
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal.open {
+    display: flex;
+}
+
+.modal-content {
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    width: 90%;
+    max-width: 600px;
+}
+
+
+footer,
+.footer,
+.footerAdmin {
+    width: 100%;
+    background: linear-gradient(90deg, #bc798f, #7e2daf);
+    color: #fff;
+    text-align: center;
+    padding: 20px 0;
+}
+
+@media (max-width: 768px) {
+    .footerAdmin {
+        position: relative;
+    }
+}
+
+
+@media (max-width: 480px) {
+    body {
+        font-size: 0.9rem;
+    }
+
+    .btn {
+        font-size: 0.85rem;
+        padding: 6px 10px;
+    }
+}
+/* ==================================================
+   FIX HEADER E FOOTER – FULL WIDTH NO MOBILE
+   (sem quebrar o layout existente)
+================================================== */
+@media (max-width: 768px) {
+
+    header,
+    .main-header,
+    header.dashboard-header,
+    footer,
+    .footer,
+    .footerAdmin {
+        width: 100vw;
+        max-width: 100vw;
+        margin-left: calc(-50vw + 50%);
+    }
+}
+
+
+
+/*css atualizado*/
+/* ==========================
+   RESET E BASE
+========================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    min-height: 100vh;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f8f9fa;
+    color: #333;
+}
+
+/* ==========================
+   LAYOUT PRINCIPAL
+========================== */
+
+main,
+.mainAdmin {
+    flex: 1;
+    width: 100%;
+    padding: 20px 0;
+}
+
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 16px;
+}
+
+/* ==========================
+   HEADER
+========================== */
+
+.site-header {
+    width: 100%;
+    background: linear-gradient(90deg, #bc798f, #7e2daf);
+    color: #fff;
+    position: relative;
+}
+
+.site-header nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+}
+
+/* ==========================
+   MENU
+========================== */
+
+#menu {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+#menu a,
+.menu-link,
+.btn-logout {
+    background: none;
+    border: none;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 8px 12px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+}
+
+/* ==========================
+   HAMBURGER
+========================== */
+
+.hamburger {
+    display: none;
+    font-size: 28px;
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+}
+
+/* ==========================
+   MENU MOBILE
+========================== */
+
+@media (max-width: 768px) {
+
+    .hamburger {
+        display: block;
+    }
+
+    #menu {
+        display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: linear-gradient(90deg, #bc798f, #7e2daf);
+        padding: 12px 0;
+        z-index: 1000;
+    }
+
+    #menu.open {
+        display: flex;
+    }
+
+    #menu li {
+        text-align: center;
+        padding: 10px 0;
+    }
+}
+
+/* ==========================
+   BOTÕES
+========================== */
+
+.btn,
+.button {
+    padding: 10px 20px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    background: linear-gradient(90deg, #bc798f, #7e2daf);
+    color: #fff;
+}
+
+.btn-success { background: #4CAF50; }
+.btn-danger  { background: #f44336; }
+
+/* ==========================
+   CARDS HOME – CORREÇÃO MOBILE
+========================== */
+
+.cards {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 10px 0;
+}
+
+.card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 14px 12px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    text-align: center;
+
+    /* 🔑 correção real */
+    max-width: 320px;
+    margin: 0 auto;
+}
+
+/* título */
+.card h3 {
+    font-size: 0.95rem;
+    margin-bottom: 6px;
+    color: #333;
+}
+
+/* descrição */
+.card p {
+    font-size: 0.8rem;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+/* botão */
+.card .btn,
+.card button {
+    width: 100%;
+    padding: 8px 0;
+    font-size: 0.8rem;
+    border-radius: 6px;
+}
+
+
+
+/* ==========================
+   TABELAS
+========================== */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+}
+
+th, td {
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+th {
+    background: linear-gradient(90deg, #bc798f, #7e2daf);
+    color: #fff;
+}
+
+tr:nth-child(even) {
+    background: #f2f2f2;
+}
+
+/* Scroll horizontal no mobile */
+@media (max-width: 768px) {
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+}
+
+/* ==========================
+   MODAIS
+========================== */
+
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.6);
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.modal.open {
+    display: flex;
+}
+
+.modal-content {
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    width: 90%;
+    max-width: 600px;
+}
+
+/* ==========================
+   FOOTER
+========================== */
+
+footer,
+.footer,
+.footerAdmin {
+    width: 100%;
+    background: linear-gradient(90deg, #bc798f, #7e2daf);
+    color: #fff;
+    text-align: center;
+    padding: 20px 0;
+    margin-top: auto;
+}
+
+/* ==========================
+   AJUSTES MOBILE PEQUENO
+========================== */
+
+@media (max-width: 480px) {
+    body {
+        font-size: 0.9rem;
+    }
+
+    .btn {
+        font-size: 0.85rem;
+        padding: 6px 10px;
+    }
+}

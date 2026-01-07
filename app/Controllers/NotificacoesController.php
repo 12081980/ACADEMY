@@ -1,22 +1,29 @@
 <?php
+
 require_once __DIR__ . '/../../core/conn.php';
 require_once __DIR__ . '/../Models/NotificacaoModel.php';
 require_once __DIR__ . '/../Models/TreinoModel.php';
+require_once __DIR__ . '/../Models/AvaliacaoModel.php';
 
 class NotificacoesController
 {
-    private $model;
     private $conn;
+    private $notificacaoModel;
 
     public function __construct($conn)
     {
         $this->conn = $conn;
-        $this->model = new NotificacaoModel($this->conn);
+        $this->notificacaoModel = new NotificacaoModel($this->conn);
     }
 
+    // =============================
+    // 📬 LISTAR NOTIFICAÇÕES
+    // =============================
     public function index()
     {
-        session_start();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
 
         if (!isset($_SESSION['usuario']['id'])) {
             header("Location: /ACADEMY/public/login");
@@ -24,48 +31,74 @@ class NotificacoesController
         }
 
         $usuarioId = $_SESSION['usuario']['id'];
-        $notificacoes = $this->model->listarPorUsuario($usuarioId);
+        $notificacoes = $this->notificacaoModel->listarPorUsuario($usuarioId);
 
-        include __DIR__ . '/../Views/notificacoes/notificacoes.php';
+        require __DIR__ . '/../Views/notificacoes/notificacoes.php';
     }
 
-    public function ver()
+    // =============================
+    // 👁️ VER NOTIFICAÇÃO
+    // =============================
+   public function ver($id = null)
 {
-    session_start();
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
 
-    if (!isset($_SESSION['usuario']['id'])) {
-        header("Location: /ACADEMY/public/login");
+    // 🔹 Se o Router não passou ID, pega via GET
+    if ($id === null && isset($_GET['id'])) {
+        $id = (int) $_GET['id'];
+    }
+
+    if (!$id) {
+        header('Location: /ACADEMY/public/notificacoes');
         exit;
     }
 
-    $notificacaoId = $_GET['id'] ?? null;
-    $usuarioId = $_SESSION['usuario']['id'];
+    // 🔹 Busca notificação
+    $notificacao = $this->notificacaoModel->getPorId($id);
 
-    if (!$notificacaoId) {
-        header("Location: /ACADEMY/public/notificacoes");
+    if (!$notificacao) {
+        header('Location: /ACADEMY/public/notificacoes');
         exit;
     }
 
-    $notificacao = $this->model->getPorId($notificacaoId);
+    // 🔹 Marca como lida
+    $this->notificacaoModel->marcarComoLida($id);
 
-    // 🔒 Segurança: notificação precisa ser do usuário logado
-    if (!$notificacao || $notificacao['usuario_id'] != $usuarioId) {
-        header("Location: /ACADEMY/public/notificacoes");
-        exit;
-    }
-
-    $this->model->marcarComoLida($notificacaoId);
-
+    // =============================
+    // 🔁 NOTIFICAÇÃO DE TREINO
+    // =============================
     if (!empty($notificacao['treino_id'])) {
+
         $treinoModel = new TreinoModel($this->conn);
         $treino = $treinoModel->getPorId($notificacao['treino_id']);
-        $exercicios = $treinoModel->getExerciciosDoTreino($notificacao['treino_id']);
+        $exercicios = $treinoModel->getExerciciosDoTreino(
+            $notificacao['treino_id']
+        );
 
-        include __DIR__ . '/../Views/notificacoes/ver_treino.php';
-        exit;
+        require __DIR__ . '/../Views/notificacoes/ver_treino.php';
+        return;
     }
 
-    header("Location: /ACADEMY/public/notificacoes");
+    // =============================
+    // 📊 NOTIFICAÇÃO DE AVALIAÇÃO
+    // =============================
+    if (!empty($notificacao['avaliacao_id'])) {
+
+        $avaliacaoModel = new AvaliacaoModel($this->conn);
+        $avaliacao = $avaliacaoModel->buscarPorId($notificacao['avaliacao_id']);
+
+        if (!$avaliacao) {
+            header('Location: /ACADEMY/public/notificacoes');
+            exit;
+        }
+
+        require __DIR__ . '/../Views/notificacoes/ver_avaliacao.php';
+        return;
+    }
+
+    header('Location: /ACADEMY/public/notificacoes');
     exit;
 }
 }

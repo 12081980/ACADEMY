@@ -167,46 +167,7 @@ class InstrutorController
     require_once __DIR__ . '/../Views/instrutor/treinos_enviados.php';
 }
 
-   
-    // public function editar_treino()
-    // {
-    //     session_start();
-    //     $id = $_GET['id'] ?? null;
-    //     if (!$id) {
-    //         header("Location: /ACADEMY/public/instrutor/treinos_enviados");
-    //         exit;
-    //     }
-
-    //     $treinoModel = new TreinoModel();
-    //     $treino = $treinoModel->getTreinoPorId($id);
-
-    //     include __DIR__ . '/../Views/instrutor/editar_treino.php';
-    // // }
-
-    // public function atualizar_treino()
-    // {
-    //     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    //         $id = $_POST['id'];
-    //         $tipo = $_POST['tipo'];
-
-    //         $treinoModel = new TreinoModel();
-    //         $treinoModel->atualizarTreino($id, $tipo);
-
-    //         header("Location: /ACADEMY/public/instrutor/treinos_enviados");
-    //         exit;
-    //     }
-    // }
-
-    public function excluir_treino()
-    {
-        $id = $_GET['id'] ?? null;
-        if ($id) {
-            $treinoModel = new TreinoModel();
-            $treinoModel->excluirTreino($id);
-        }
-        header("Location: /ACADEMY/public/instrutor/treinos_enviados");
-        exit;
-    }
+  
     public function enviar_treino()
     {
         session_start();
@@ -245,7 +206,7 @@ class InstrutorController
         include __DIR__ . '/../Views/instrutor/avaliacaoEscolher.php';
     }
 
-   public function salvarAvaliacao()
+ public function salvarAvaliacao()
 {
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
@@ -259,12 +220,26 @@ class InstrutorController
         }
 
         require_once __DIR__ . '/../Models/AvaliacaoModel.php';
+        require_once __DIR__ . '/../Models/NotificacaoModel.php';
 
         $avaliacaoModel = new AvaliacaoModel($this->conn);
+        $notificacaoModel = new NotificacaoModel($this->conn);
 
         $_POST['instrutor_id'] = $_SESSION['usuario']['id'];
 
+        // 1️⃣ Salva avaliação
         $avaliacaoModel->salvar($_POST);
+
+        // 2️⃣ Pega ID da avaliação salva
+        $avaliacaoId = $avaliacaoModel->getLastId();
+
+        // 3️⃣ Cria notificação para o aluno
+        $mensagem = "📊 Uma nova avaliação física foi registrada.";
+        $notificacaoModel->enviarAvaliacao(
+            $_POST['usuario_id'],
+            $avaliacaoId,
+            $mensagem
+        );
 
         echo json_encode([
             'status' => 'sucesso',
@@ -333,23 +308,45 @@ class InstrutorController
 
         require __DIR__ . '/../Views/instrutor/avaliacaoNova.php';
     }
-    public function avaliacaoVer($id)
-    {
-        $model = new AvaliacaoModel($this->conn);
-        $avaliacao = $model->buscarPorId($id);
+    // public function avaliacaoVer($id)
+    // {
+    //     $model = new AvaliacaoModel($this->conn);
+    //     $avaliacao = $model->buscarPorId($id);
 
-        if (!$avaliacao) {
-            echo "Avaliação não encontrada!";
-            return;
-        }
+    //     if (!$avaliacao) {
+    //         echo "Avaliação não encontrada!";
+    //         return;
+    //     }
 
-        // Ajuste: o nome sempre ficará em $avaliacao['nome']
-        if (!isset($avaliacao['nome']) && isset($avaliacao['nome_usuario'])) {
-            $avaliacao['nome'] = $avaliacao['nome_usuario'];
-        }
+    //     // Ajuste: o nome sempre ficará em $avaliacao['nome']
+    //     if (!isset($avaliacao['nome']) && isset($avaliacao['nome_usuario'])) {
+    //         $avaliacao['nome'] = $avaliacao['nome_usuario'];
+    //     }
 
-        include __DIR__ . '/../Views/Instrutor/avaliacaoVer.php';
+    //     include __DIR__ . '/../Views/Instrutor/avaliacaoVer.php';
+    // }
+public function avaliacaoVer($idRota = null)
+{
+    // Aceita id tanto por rota quanto por ?id=
+    $id = $idRota ?? ($_GET['id'] ?? null);
+
+    if (!$id) {
+        header("Location: /ACADEMY/public/instrutor/avaliacoes");
+        exit;
     }
+
+    require_once __DIR__ . '/../Models/AvaliacaoModel.php';
+    $avaliacaoModel = new AvaliacaoModel($this->conn);
+
+    $avaliacao = $avaliacaoModel->buscarPorId($id);
+
+    if (!$avaliacao) {
+        header("Location: /ACADEMY/public/instrutor/avaliacoes");
+        exit;
+    }
+
+    include __DIR__ . '/../Views/instrutor/avaliacaoVer.php';
+}
 
 
     public function avaliacaoExcluir($id)
@@ -397,139 +394,73 @@ class InstrutorController
 
         include __DIR__ . '/../Views/Instrutor/avaliacaoPdf.php';
     }
-    public function avaliacaoEditarSalvar($id)
-    {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            http_response_code(405);
-            echo "Método não permitido.";
-            return;
-        }
+   
 
-        if (session_status() === PHP_SESSION_NONE)
-            session_start();
-
-        require_once __DIR__ . '/../Models/AvaliacaoModel.php';
-        $avaliacaoModel = new AvaliacaoModel($this->conn);
-
-        // campos esperados
-        $campos = [
-            'estatura',
-            'peso',
-            'imc',
-            'subescapular',
-            'triceps',
-            'axilar_media',
-            'toracica',
-            'supra_iliaca',
-            'abdominal',
-            'coxa',
-            'percentual_gordura',
-            'massa_magra',
-            'massa_gorda',
-            'torax',
-            'cintura',
-            'abdomen_med',
-            'quadril',
-            'coxa_direita',
-            'coxa_esquerda',
-            'perna_direita',
-            'perna_esquerda',
-            'braco_direito',
-            'braco_esquerdo',
-            'antebraco_direito',
-            'antebraco_esquerdo',
-            'rcq',
-            'nivel_atividade',
-            'tmb',
-            'necessidade_energetica',
-            'cirurgia',
-            'patologia',
-            'medicamento',
-            'fatores_risco',
-            'atividade_atual',
-            'rotina',
-            'objetivo',
-            'observacoes'
-        ];
-
-        // Monte o array somente com valores vindos do formulário e normalize
-        $dados = [];
-        foreach ($campos as $campo) {
-            $valor = $_POST[$campo] ?? null;
-            // opcional: normalizar números vazios para NULL
-            if ($valor === '' || $valor === null) {
-                $dados[$campo] = null;
-            } else {
-                // se for número com vírgula, padroniza para ponto (ex: 1,75 -> 1.75)
-                if (is_string($valor) && preg_match('/^\d+,\d+$/', $valor)) {
-                    $valor = str_replace(',', '.', $valor);
-                }
-                $dados[$campo] = $valor;
-            }
-        }
-
-        try {
-            $ok = $avaliacaoModel->atualizar($id, $dados);
-        } catch (\Exception $e) {
-            // debug temporário: grave em session e redirecione ou exiba
-            $_SESSION['msg_erro'] = "Erro ao atualizar avaliação: " . $e->getMessage();
-            header("Location: /ACADEMY/public/instrutor/avaliacaoVer/$id");
-            exit;
-        }
-
-        if ($ok) {
-            $_SESSION['msg_sucesso'] = "Avaliação atualizada com sucesso!";
-            header("Location: /ACADEMY/public/instrutor/avaliacaoVer/$id");
-            exit;
-        } else {
-            // tentar obter mensagem de erro do model (se implementar)
-            $err = method_exists($avaliacaoModel, 'getError') ? $avaliacaoModel->getError() : 'Erro desconhecido';
-            $_SESSION['msg_erro'] = "Erro ao atualizar avaliação! $err";
-            header("Location: /ACADEMY/public/instrutor/avaliacaoVer/$id");
-            exit;
-        }
+    public function avaliacaoEditar($id)
+{
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
     }
 
+    require_once __DIR__ . '/../Models/AvaliacaoModel.php';
+    $model = new AvaliacaoModel($this->conn);
 
-
-    // public function avaliacaoEditar($id)
-    // {
-    //     if (session_status() === PHP_SESSION_NONE)
-    //         session_start();
-
-    //     require_once __DIR__ . '/../Models/AvaliacaoModel.php';
-    //     $model = new AvaliacaoModel($this->conn);
-
-    //     $avaliacao = $model->buscarPorId($id);
-
-    //     if (!$avaliacao) {
-    //         echo "Avaliação não encontrada!";
-    //         return;
-    //     }
-
-    //     require __DIR__ . '/../Views/Instrutor/avaliacaoEditar.php';
-    // }
- public function avaliacaoEditar($id)
-{
-    $avaliacaoModel = new AvaliacaoModel($this->conn);
-
+    // 🔹 SE FOR POST → SALVA
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $dados = $_POST;
 
-        $ok = $avaliacaoModel->atualizar($id, $dados);
+        try {
+            $ok = $model->atualizar($id, $dados);
 
-        if ($ok) {
-            $_SESSION['sucesso'] = 'Avaliação editada com sucesso!';
+            if ($ok) {
+                $_SESSION['msg_sucesso'] = "Avaliação atualizada com sucesso!";
+            } else {
+                $_SESSION['msg_erro'] = "Erro ao atualizar avaliação!";
+            }
+
             header("Location: /ACADEMY/public/instrutor/avaliacaoVer/$id");
             exit;
-        } else {
-            $_SESSION['erro'] = 'Erro ao atualizar avaliação.';
+
+        } catch (Throwable $e) {
+            $_SESSION['msg_erro'] = "Erro: " . $e->getMessage();
+            header("Location: /ACADEMY/public/instrutor/avaliacaoVer/$id");
+            exit;
         }
     }
 
-    $avaliacao = $avaliacaoModel->buscarPorId($id);
-    include __DIR__ . '/../Views/Instrutor/avaliacaoEditar.php';
+    // 🔹 SE FOR GET → MOSTRA FORMULÁRIO
+    $avaliacao = $model->buscarPorId($id);
+
+    if (!$avaliacao) {
+        echo "Avaliação não encontrada!";
+        return;
+    }
+
+    require __DIR__ . '/../Views/Instrutor/avaliacaoEditar.php';
 }
 
+    //     public function avaliacaoAtualizar($id)
+//     {
+//         if (session_status() === PHP_SESSION_NONE)
+//             session_start();
+
+    //         require_once __DIR__ . '/../Models/AvaliacaoModel.php';
+//         $model = new AvaliacaoModel($this->conn);
+
+    //         $dados = $_POST;
+
+    //         $ok = $model->atualizar($id, $dados);
+
+    //         if ($ok) {
+//             $_SESSION['msg_sucesso'] = "Avaliação atualizada com sucesso!";
+//         } else {
+//             $_SESSION['msg_erro'] = "Erro ao atualizar!";
+//         }
+
+    //         header("Location: /ACADEMY/public/instrutor/avaliacaoVer/$id");
+//         exit;
+//     }
+
+    //   // ... outros métodos ...
 }

@@ -2,7 +2,10 @@
 
 <h2>Gráfico de Evolução</h2>
 
-<canvas id="graficoEvolucao"></canvas>
+<div class="grafico-container">
+    <canvas id="graficoEvolucao"></canvas>
+</div>
+
 
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

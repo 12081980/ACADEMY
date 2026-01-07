@@ -14,25 +14,20 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 ?>
-
-<header>
-  <div class="container">
-        <nav>
+  <header class="site-header">
+    <nav class="container">
             <button class="hamburger" onclick="toggleMenu()" aria-label="Menu">☰</button>
-      
-
-      <ul id="menu">
-        <li><a href="/ACADEMY/public/instrutor/dashboardInstrutor">🏠 INÍCIO</a></li>
-        <li><a href="/ACADEMY/public/instrutor/enviar">📤 ENVIAR TREINO</a></li>
-        <li><a href="/ACADEMY/public/instrutor/treinos_enviados">📋 TREINOS ENVIADOS</a></li>
-        <li><a href="/ACADEMY/public/instrutor/avaliacaoEscolher">🧾 AVALIAÇÕES FÍSICAS</a></li>
-        <li><a href="/ACADEMY/public/instrutor/avaliacoesSalvas">📋 AVALIAÇÕES REALIZADAS</a></li>
-        <li><a href="/ACADEMY/public/auth/logout">🚪 SAIR</a></li>
+            <ul id="menu">
+        <li><a href="/ACADEMY/public/instrutor/dashboardInstrutor"> INÍCIO</a></li>
+        <li><a href="/ACADEMY/public/instrutor/enviar"> ENVIAR TREINO</a></li>
+        <li><a href="/ACADEMY/public/instrutor/treinos_enviados"> TREINOS ENVIADOS</a></li>
+        <li><a href="/ACADEMY/public/instrutor/avaliacaoEscolher"> AVALIAÇÕES FÍSICAS</a></li>
+        <li><a href="/ACADEMY/public/instrutor/avaliacoesSalvas"> AVALIAÇÕES REALIZADAS</a></li>
+        <li><a href="/ACADEMY/public/auth/logout"> SAIR</a></li>
       </ul>
 
     </nav>
-  </div>
-</header>
+  </header>
 
 
 <main>
