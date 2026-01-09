@@ -110,11 +110,12 @@ class UsuarioModel
     /**
      * Excluir usuário pelo ID
      */
-    public function excluirUsuario($id)
-    {
-        $stmt = $this->conn->prepare("DELETE FROM {$this->table} WHERE id = :id");
-        return $stmt->execute([':id' => $id]);
-    }
+   public function excluirUsuario($id)
+{
+    $stmt = $this->conn->prepare("DELETE FROM usuario WHERE id = :id");
+    return $stmt->execute([':id' => $id]);
+}
+
 
     /**
      * Autenticar usuário (login)
@@ -152,7 +153,7 @@ class UsuarioModel
 
     public function buscarTodosUsuarios()
     {
-        $sql = "SELECT id, nome, email FROM {$this->table} WHERE tipo = ''";
+        $sql = "SELECT id, nome, email FROM {$this->table} WHERE tipo = 'usuario'";
         $stmt = $this->conn->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -181,7 +182,7 @@ class UsuarioModel
         $stmt = $this->conn->prepare("
         SELECT id, nome, email 
         FROM usuario 
-        WHERE tipo = '' 
+        WHERE tipo = 'usuario' 
         ORDER BY nome ASC
     ");
         $stmt->execute();
@@ -194,25 +195,28 @@ public function buscaPorId($id)
     $stmt->execute([$id]);
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
-public function buscarUsuariosPaginados($limit, $offset)
-{
-    $sql = "SELECT * FROM usuario ORDER BY nome LIMIT :limit OFFSET :offset";
-    $stmt = $this->conn->prepare($sql);
-    $stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
-    $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
-    $stmt->execute();
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
+ public function buscarUsuariosPaginados($limit, $offset)
+    {
+        $stmt = $this->conn->prepare("
+            SELECT id, nome, email, tipo
+            FROM usuario
+            ORDER BY nome ASC
+            LIMIT :limit OFFSET :offset
+        ");
 
-public function contarUsuarios()
-{
-    $sql = "SELECT COUNT(*) FROM usuario";
-    return $this->conn->query($sql)->fetchColumn();
-}
-public function totalUsuarios() {
-    $sql = $this->conn->query("SELECT COUNT(*) AS total FROM usuario");
-    return $sql->fetch(PDO::FETCH_ASSOC)['total'];
-}
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // 🔹 CONTA TODOS (SEM FILTRO)
+    public function contarUsuarios()
+    {
+        $stmt = $this->conn->query("SELECT COUNT(*) FROM usuario");
+        return (int) $stmt->fetchColumn();
+    }
 
 public function totalInstrutores() {
     $sql = $this->conn->query("SELECT COUNT(*) AS total FROM usuario WHERE tipo = 'instrutor'");
@@ -236,7 +240,7 @@ public function contarUsuario()
     public function atualizar(int $id, array $dados): bool
     {
         // ajuste o nome da tabela/colunas conforme o seu esquema
-        $sql = 'UPDATE usuario SET nome = :nome, email = :email, tipo = :tipo WHERE id = :id';
+        $sql = 'UPDATE usuarios SET nome = :nome, email = :email, tipo = :tipo WHERE id = :id';
         $stmt = $this->conn->prepare($sql);
 
         return $stmt->execute([
@@ -246,8 +250,7 @@ public function contarUsuario()
             ':id'    => $id,
         ]);
     }
-
-    // ...existing code...
+   
 }
 
 
