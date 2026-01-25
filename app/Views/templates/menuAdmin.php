@@ -24,15 +24,15 @@ if (session_status() === PHP_SESSION_NONE) {
         <!-- MENU -->
         <ul id="menu">
             <li>
-                <a href="/ACADEMY/public/admin/dashboard">🏠 DASHBOARD</a>
+                <a href="/ACADEMY/public/admin/dashboard"> DASHBOARD</a>
             </li>
 
             <li>
-                <a href="/ACADEMY/public/admin/lista_usuario">👥 USUÁRIOS</a>
+                <a href="/ACADEMY/public/admin/lista_usuario">USUÁRIOS</a>
             </li>
 
             <li>
-                <a href="/ACADEMY/public/admin/relatoriosAcesso">📊 RELATÓRIOS</a>
+                <a href="/ACADEMY/public/admin/relatoriosAcesso"> RELATÓRIOS</a>
             </li>
 
             <li class="menu-perfil">
@@ -44,7 +44,7 @@ if (session_status() === PHP_SESSION_NONE) {
             <li>
                 <form action="/ACADEMY/public/auth/logout" method="post">
                     <button type="submit" class="menu-link btn-logout">
-                        🚪 SAIR
+                         SAIR
                     </button>
                 </form>
             </li>

@@ -36,13 +36,31 @@ class AdminController
      * Lista todos os alunos com seus últimos treinos (se houver)
      */
    
-    public function excluirUsuario($id)
-    {
-         $this->verificarAdmin();
-      $usuarioModel = new UsuarioModel($this->conn);
+  public function excluirUsuario($id)
+{
+    $this->verificarAdmin();
 
+    header('Content-Type: application/json');
+
+    $usuarioModel = new UsuarioModel($this->conn);
+
+    try {
         $usuarioModel->excluirUsuario($id);
+
+        echo json_encode([
+            'status' => 'sucesso',
+            'mensagem' => 'Usuário excluído com sucesso!'
+        ]);
+    } catch (Exception $e) {
+        echo json_encode([
+            'status' => 'erro',
+            'mensagem' => 'Erro ao excluir usuário.'
+        ]);
     }
+
+    exit;
+}
+
     /**
      * Mostra detalhes de um usuário e seus treinos realizados
      */
@@ -125,36 +143,54 @@ class AdminController
 }
 
     public function editarUsuario($id)
-    {
-         $this->verificarAdmin();
-        $usuarioModel = new UsuarioModel($this->conn);
-        $usuario = $usuarioModel->getAll($id);
+{
+    $usuarioModel = new UsuarioModel($this->conn);
 
-        if (!$usuario) {
-            echo "<p>Usuário não encontrado.</p>";
-            return;
-        }
+    $usuario = $usuarioModel->buscarPorId((int)$id);
 
-        include __DIR__ . '/../Views/admin/editar_usuario.php';
+    if (!$usuario) {
+        echo "<p>Usuário não encontrado.</p>";
+        return;
     }
 
-    public function atualizarUsuario($id)
-    {
-         $this->verificarAdmin();
-        $usuarioModel = new UsuarioModel($this->conn);
+    require __DIR__ . '/../Views/admin/editar_usuario.php';
+}
 
-        $dados = [
-            'nome' => $_POST['nome'] ?? '',
-            'email' => $_POST['email'] ?? '',
-            'tipo' => $_POST['tipo'] ?? 'Usuário'
-        ];
 
-        $usuarioModel->atualizar($id, $dados);
+ public function atualizarUsuario($id)
+{
+    $this->verificarAdmin();
 
-        // Redireciona de volta para a lista de usuários
-        header("Location: /ACADEMY/public/admin/lista_usuarios");
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        header("Location: /ACADEMY/public/admin/lista_usuario");
         exit;
     }
+
+    $usuarioModel = new UsuarioModel($this->conn);
+
+    $dados = [
+        'nome'  => trim($_POST['nome'] ?? ''),
+        'email' => trim($_POST['email'] ?? ''),
+        'tipo'  => $_POST['tipo'] ?? 'usuario'
+    ];
+
+    if ($usuarioModel->atualizar($id, $dados)) {
+        $_SESSION['msg_sucesso'] = 'Usuário atualizado com sucesso!';
+    } else {
+        $_SESSION['msg_erro'] = 'Erro ao atualizar usuário.';
+    }
+
+    // 🔴 NÃO CHAMA VIEW
+    // 🔴 NÃO EXIBE PÁGINA
+    header("Location: /ACADEMY/public/admin/lista_usuario");
+    exit;
+}
+
+
 
 
 public function listaUsuarios()

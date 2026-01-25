@@ -140,6 +140,10 @@ $router->addRoute('/treinos/recebidos', 'TreinoController@recebidos', ['GET']);
 
 $router->addRoute('/instrutor/enviar_treino', 'InstrutorController@enviarTreinoForm', ['GET']);
 $router->addRoute('/instrutor/enviar_treino', 'InstrutorController@enviarTreino', ['POST']);
+$router->addRoute('/cardio/iniciar', 'CardioController@iniciar');
+$router->addRoute('/cardio/andamento', 'CardioController@andamento');
+$router->addRoute('/cardio/finalizar', 'CardioController@finalizar');
+$router->addRoute('/cardio/historico', 'CardioController@historico');
 
 // ==================================================
 // ✅ REGISTRO
@@ -159,6 +163,20 @@ $router->addRoute(
     'UsuarioController@avaliacaoVer'
 );
 
+$router->addRoute('/admin/editarUsuario/{id}', 'AdminController@editarUsuario');
+$router->addRoute('/cardio/iniciar', 'CardioController@iniciar');
+
+$router->addRoute(
+    '/cardio/iniciar',
+    'CardioController@iniciar',
+    ['POST']
+);
+$router->addRoute('/cardio/andamento', 'CardioController@andamento', ['GET']);
+$router->addRoute('/cardio/finalizar', 'CardioController@finalizar', ['POST']);
+$router->addRoute('/cardio/historico', 'CardioController@historico', ['GET']);
+$router->addRoute('/cardio/finalizar', 'CardioController@finalizar', ['POST']);
+$router->addRoute('/cardio/indexCardio', 'CardioController@indexCardio');
+
 // ==================================================
 // ✅ ROTA FINAL: DESPACHA A REQUISIÇÃO
 // ==================================================
@@ -169,6 +187,8 @@ $basePath = '/ACADEMY/public';
 if (strpos($url, $basePath) === 0) {
     $url = substr($url, strlen($basePath));
 }
+
+
 // Detecta automaticamente o caminho base
 // $basePath = '/'; // no servidor remoto, raiz do domínio
 // if (strpos($url, $basePath) === 0) {

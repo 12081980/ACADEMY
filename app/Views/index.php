@@ -26,6 +26,8 @@
         <span>Superiores Posturais + Core</span>
         <button class="btn" data-modal="modalD">Ver detalhes</button>
     </article>
+    <!-- CARD CORRIDA / CAMINHADA (MOBILE) -->
+
 </section>
 
 <!-- MODAL A -->
@@ -154,6 +156,13 @@
             <option value="Abdominal Prancha">
         </datalist>
     </div>
+    </div>
+  
+
+</div>
+
+</div>
+
 </div>
 <script>
     const usuario_id = <?= json_encode($_SESSION['usuario']['id'] ?? null) ?>;

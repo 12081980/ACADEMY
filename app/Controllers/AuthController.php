@@ -46,7 +46,7 @@ class AuthController
         $up->execute([':hash' => $hash, ':id' => $usuario['id']]);
     }
 
-    $tipo = $usuario['tipo'] ?? 'aluno';
+    $tipo = $usuario['tipo'] ?? 'usuario';
 
     $_SESSION['usuario'] = [
         'id' => $usuario['id'],
@@ -90,72 +90,99 @@ class AuthController
 
     }
 
-    public function register()
-    {
-      
+   public function register()
+{
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
 
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $nome = trim($_POST['nome'] ?? '');
-            $email = trim($_POST['email'] ?? '');
-            $senha = $_POST['senha'] ?? '';
-            $telefone = trim($_POST['telefone'] ?? '');           
-            $cidade = trim($_POST['cidade'] ?? '');
-            $estado = trim($_POST['estado'] ?? '');
-            $bairro = trim($_POST['bairro'] ?? '');
-            $rua = trim($_POST['rua'] ?? '');
-            $numero = trim($_POST['numero'] ?? '');
-            $tipo = $_POST['tipo'] ?? '';
-
-            if (!$nome || !$email || !$senha) {
-                $_SESSION['erro_cadastro'] = "Preencha todos os campos obrigatórios!";
-                header("Location: /ACADEMY/public/home");
-                exit;
-            }
-
-            $hash = password_hash($senha, PASSWORD_DEFAULT);
-
-            $stmt = $this->conn->prepare("
-            INSERT INTO usuario 
-            (nome, email, senha, telefone, cidade, estado, bairro, rua, numero, tipo)
-            VALUES (:nome, :email, :senha, :telefone,  :cidade, :estado, :bairro, :rua, :numero, :tipo)
-        ");
-
-            $stmt->bindParam(':nome', $nome);
-            $stmt->bindParam(':email', $email);
-            $stmt->bindParam(':senha', $hash);
-            $stmt->bindParam(':telefone', $telefone);          
-            $stmt->bindParam(':cidade', $cidade);
-            $stmt->bindParam(':estado', $estado);
-            $stmt->bindParam(':bairro', $bairro);
-            $stmt->bindParam(':rua', $rua);
-            $stmt->bindParam(':numero', $numero);
-            $stmt->bindParam(':tipo', $tipo);
-
-            if ($stmt->execute()) {
-                $_SESSION['usuario'] = [
-                    'id' => $this->conn->lastInsertId(),
-                    'nome' => $nome,
-                    'email' => $email,
-                    'telefone' => $telefone,                 
-                    'cidade' => $cidade,
-                    'estado' => $estado,
-                    'bairro' => $bairro,
-                    'rua' => $rua,
-                    'numero' => $numero,
-                    'tipo' => $tipo
-                ];
-                header("Location: /ACADEMY/public/home");
-                exit;
-            } else {
-                $_SESSION['erro_cadastro'] = "Erro ao cadastrar usuário.";
-                header("Location: /ACADEMY/public/home");
-                exit;
-            }
-        }
-
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         header("Location: /ACADEMY/public/home");
         exit;
     }
+
+    $nome     = trim($_POST['nome'] ?? '');
+    $email    = trim($_POST['email'] ?? '');
+    $senha    = $_POST['senha'] ?? '';
+    $telefone = trim($_POST['telefone'] ?? '');
+    $cidade   = trim($_POST['cidade'] ?? '');
+    $estado   = trim($_POST['estado'] ?? '');
+    $bairro   = trim($_POST['bairro'] ?? '');
+    $rua      = trim($_POST['rua'] ?? '');
+    $numero   = trim($_POST['numero'] ?? '');
+    $tipo     = $_POST['tipo'] ?? 'usuario';
+
+    // 🔒 Validação básica
+    if (!$nome || !$email || !$senha) {
+        $_SESSION['erro_cadastro'] = "Preencha todos os campos obrigatórios!";
+        header("Location: /ACADEMY/public/home");
+        exit;
+    }
+
+    // 🔍 VERIFICAR SE EMAIL JÁ EXISTE
+    $check = $this->conn->prepare(
+        "SELECT id FROM usuario WHERE email = :email"
+    );
+    $check->execute([':email' => $email]);
+
+    if ($check->fetch()) {
+        $_SESSION['erro_cadastro'] = "Este email já está cadastrado.";
+        header("Location: /ACADEMY/public/home");
+        exit;
+    }
+
+    $hash = password_hash($senha, PASSWORD_DEFAULT);
+
+    try {
+        $stmt = $this->conn->prepare("
+            INSERT INTO usuario 
+            (nome, email, senha, telefone, cidade, estado, bairro, rua, numero, tipo)
+            VALUES
+            (:nome, :email, :senha, :telefone, :cidade, :estado, :bairro, :rua, :numero, :tipo)
+        ");
+
+        $stmt->execute([
+            ':nome'     => $nome,
+            ':email'    => $email,
+            ':senha'    => $hash,
+            ':telefone' => $telefone,
+            ':cidade'   => $cidade,
+            ':estado'   => $estado,
+            ':bairro'   => $bairro,
+            ':rua'      => $rua,
+            ':numero'   => $numero,
+            ':tipo'     => $tipo
+        ]);
+
+        $_SESSION['usuario'] = [
+            'id' => $this->conn->lastInsertId(),
+            'nome' => $nome,
+            'email' => $email,
+            'telefone' => $telefone,
+            'cidade' => $cidade,
+            'estado' => $estado,
+            'bairro' => $bairro,
+            'rua' => $rua,
+            'numero' => $numero,
+            'tipo' => $tipo
+        ];
+
+        $_SESSION['sucesso_cadastro'] = "Cadastro realizado com sucesso!";
+        header("Location: /ACADEMY/public/home");
+        exit;
+
+    } catch (PDOException $e) {
+
+        // 🧯 Garantia extra (UNIQUE email)
+        if ($e->getCode() == 23000) {
+            $_SESSION['erro_cadastro'] = "Este email já está cadastrado.";
+            header("Location: /ACADEMY/public/home");
+            exit;
+        }
+
+        throw $e; // outros erros reais
+    }
+}
 
 
 

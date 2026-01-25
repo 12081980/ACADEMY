@@ -4,72 +4,104 @@ $paginaAtual = $paginaAtual ?? 1;
 $totalPaginas = !empty($totalPaginas) ? $totalPaginas : 1;
 $treinos = !empty($treinos) ? $treinos : [];
 ?>
-<div class="container">  
-<table>
-    <thead>
-        <tr>
-            <th>Nome</th>
-            <th>Email</th>
-            <th>Tipo</th>
-            <th>Ações</th>
-        </tr>
-    </thead>
+<?php if (!empty($_SESSION['msg_sucesso'])): ?>
+    <div class="alert sucesso">
+        <?= $_SESSION['msg_sucesso'] ?>
+    </div>
+    <?php unset($_SESSION['msg_sucesso']); ?>
+<?php endif; ?>
 
-    <tbody>
-        <?php if (!empty($usuarios)): ?>
-            <?php foreach ($usuarios as $user): ?>
-                <tr>
-                    <td><?= htmlspecialchars($user['nome'] ?? '') ?></td>
-                    <td><?= htmlspecialchars($user['email'] ?? '') ?></td>
-                    <td><?= htmlspecialchars($user['tipo'] ?? 'Usuário') ?></td>
-                    <td class="actions">
-                        <a href="/ACADEMY/public/admin/editar_usuario/<?= htmlspecialchars($user['id'] ?? '') ?>" class="button editar">Editar</a>
-                        <button class="button excluir" onclick="excluirUsuario(<?= htmlspecialchars($user['id'] ?? '0') ?>)">Excluir</button>
-                    </td>
-                </tr>
-            <?php endforeach; ?>
-        <?php else: ?>
+<?php if (!empty($_SESSION['msg_erro'])): ?>
+    <div class="alert erro">
+        <?= $_SESSION['msg_erro'] ?>
+    </div>
+    <?php unset($_SESSION['msg_erro']); ?>
+<?php endif; ?>
+
+<div class="container">
+    <table>
+        <thead>
             <tr>
-                <td colspan="4" style="text-align:center;">Nenhum usuário encontrado.</td>
+                <th>Nome</th>
+                <th>Email</th>
+                <th>Tipo</th>
+                <th>Ações</th>
             </tr>
-        <?php endif; ?>
-    </tbody>
-</table>
+        </thead>
 
-<!-- PAGINAÇÃO AQUI 👇 -->
-  <?php if ($totalPaginas > 1): ?>
+        <tbody>
+            <?php if (!empty($usuarios)): ?>
+                <?php foreach ($usuarios as $user): ?>
+                    <tr>
+                        <td><?= htmlspecialchars($user['nome'] ?? '') ?></td>
+                        <td><?= htmlspecialchars($user['email'] ?? '') ?></td>
+                        <td><?= htmlspecialchars($user['tipo'] ?? '') ?></td>
+                        <td class="actions">
+                           <a href="/ACADEMY/public/admin/editarUsuario/<?= (int)$user['id'] ?>"
+   class="button editar">
+   Editar
+</a>
+
+
+
+                           <form action="/ACADEMY/public/admin/excluir_usuario" method="POST" 
+      onsubmit="return confirm('Tem certeza que deseja excluir este usuário?');"
+      style="display:inline;">
+      
+    <input type="hidden" name="id" value="<?= (int)$user['id'] ?>">
+    
+   <button class="button excluir" onclick="excluirUsuario(<?= (int)$user['id'] ?>)">
+    Excluir
+</button>
+
+
+</form>
+
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <tr>
+                    <td colspan="4" style="text-align:center;">Nenhum usuário encontrado.</td>
+                </tr>
+            <?php endif; ?>
+        </tbody>
+    </table>
+
+    <!-- PAGINAÇÃO AQUI 👇 -->
+    <?php if ($totalPaginas > 1): ?>
         <div class="paginacao" style="margin-top:20px; text-align:center;">
             <?php for ($i = 1; $i <= $totalPaginas; $i++): ?>
                 <?php if ($i == $paginaAtual): ?>
                     <strong>[<?= $i ?>]</strong>
                 <?php else: ?>
-                   <a href="/ACADEMY/public/admin/lista_usuario?pagina=<?= $i ?>" 
-   style="margin:0 5px; text-decoration:none; <?= $paginaAtual == $i ? 'font-weight: bold; color: red;' : '' ?>">
-   <?= $i ?>
-</a>
+                    <a href="/ACADEMY/public/admin/lista_usuario?pagina=<?= $i ?>"
+                        style="margin:0 5px; text-decoration:none; <?= $paginaAtual == $i ? 'font-weight: bold; color: red;' : '' ?>">
+                        <?= $i ?>
+                    </a>
                 <?php endif; ?>
             <?php endfor; ?>
         </div>
     <?php endif; ?>
 
-<script>
-    function excluirUsuario(id) {
-        if (!confirm('Tem certeza que deseja excluir este usuário?')) return;
+   <script>
+function excluirUsuario(id) {
+    if (!confirm('Tem certeza que deseja excluir este usuário?')) return;
 
-        fetch(`/ACADEMY/public/admin/excluir_usuario/${id}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id })
-        })
-        .then(res => res.json())
-        .then(data => {
-            alert(data.mensagem);
-            if (data.status === 'sucesso') {
-                location.reload();
-            }
-        })
-        .catch(() => alert('Erro ao excluir usuário.'));
-    }
+    fetch(`/ACADEMY/public/admin/excluir_usuario/${id}`, {
+        method: 'POST'
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.mensagem);
+
+        if (data.status === 'sucesso') {
+            window.location.href = '/ACADEMY/public/admin/lista_usuario';
+        }
+    })
+    .catch(() => alert('Erro inesperado.'));
+}
 </script>
 
-<!-- <?php include __DIR__ . '/../templates/footerAdmin.php'; ?> -->
+
+     <?php include __DIR__ . '/../templates/footerAdmin.php'; ?>

@@ -57,6 +57,7 @@ if (isset($_SESSION['usuario']['id'])) {
                     <li><a href="/ACADEMY/public/treinos/realizados"> TREINOS REALIZADOS</a></li>
                     <li><a href="/ACADEMY/public/treinos/em_andamento"> TREINOS EM ANDAMENTO</a></li>
                     <li><a href="/ACADEMY/public/treinos/graficos"> GRÁFICO DE EVOLUÇÃO</a></li>
+                    <li><a href="/ACADEMY/public/cardio/indexCardio">CÁRDIO</a></li>
 <?php if ($novas > 0): ?>
     <li>
         <a href="/ACADEMY/public/notificacoes" class="menu-notificacao">

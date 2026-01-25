@@ -141,6 +141,7 @@ main,
     font-weight: bold;
     background: linear-gradient(90deg, #bc798f, #7e2daf);
     color: #fff;
+    text-decoration: none;
 }
 
 .btn-success { background: #4CAF50; }
@@ -1064,6 +1065,7 @@ form button[type="submit"] {
     width: auto;              /* NÃO pode ser 100% */
     min-width: 150px;
     text-align: center;
+      text-decoration: none;
 }
 
 
@@ -1082,6 +1084,7 @@ form button[type="submit"] {
     .acoes-avaliacao .btn {
         width: 80%;
         min-width: auto;
+          text-decoration: none;
     }       
 }
 .exercicios-linha {
@@ -1099,6 +1102,7 @@ form button[type="submit"] {
     margin: 20px auto 0;
     display: block;
     padding: 10px 24px;
+      text-decoration: none;
 }
 @media (max-width: 768px) {
 
@@ -1207,4 +1211,531 @@ form button[type="submit"] {
     display: flex;
     justify-content: center;
     gap: 15px;
+}
+.dashboard-container {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.dashboard-title {
+    text-align: center;
+    margin-bottom: 40px;
+    font-size: 28px;
+    font-weight: 600;
+    color: #333;
+}
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 25px;
+}
+
+.card {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 25px;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 18px 35px rgba(0,0,0,0.12);
+}
+
+.card-icon {
+    font-size: 48px;
+}
+
+.card-info span {
+    display: block;
+    font-size: 15px;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.card-info strong {
+    font-size: 32px;
+    color: #222;
+}
+
+/* Cores específicas */
+.card.users {
+    border-left: 6px solid #6a11cb;
+}
+
+.card.trainers {
+    border-left: 6px solid #ff9800;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+    .dashboard-title {
+        font-size: 22px;
+    }
+
+    .card {
+        padding: 20px;
+    }
+
+    .card-info strong {
+        font-size: 26px;
+    }
+    /* Card exclusivo mobile */
+.mobile-only {
+    display: none;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .mobile-only {
+        display: block;
+    }
+
+    .card-cardio {
+        /* background: linear-gradient(135deg, #0f9b8e, #38ef7d); */
+        color: #fff;
+        align-items: center;
+    }
+
+    .card-cardio h3 {
+        font-size: 1.1rem;
+    }
+
+    .card-cardio span {
+        font-size: 0.85rem;
+        opacity: 0.9;
+    }
+}
+.paginacao {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin: 30px 0;
+}
+
+.paginacao .btn {
+    width: auto !important;
+    padding: 4px 10px;
+    font-size: 12px;
+    min-width: 32px;
+    border-radius: 10px;
+}
+
+.paginacao .btn.ativo {
+    background: linear-gradient(135deg, #7b2cbf, #9d4edd);
+    color: #fff;
+}
+}
+.cards-cardio {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.card-cardio {
+    background: #fff;
+    border-radius: 16px;
+    padding: 14px 16px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.card-cardio h3 {
+    font-size: 16px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.card-cardio .info {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    font-size: 13px;
+    gap: 4px 8px;
+}
+
+.card-cardio small {
+    font-size: 12px;
+    color: #666;
+}
+.btn-voltar {
+    margin-bottom: 16px;
+    width: fit-content;
+      text-decoration: none;
+      text-align: center;
+}
+.paginacao {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin: 30px 0;
+}
+
+.btn-pagina {
+    width: auto !important;
+    padding: 4px 10px;
+    font-size: 12px;
+    min-width: 32px;
+    border-radius: 10px;
+}
+
+.btn-pagina.ativo {
+    background: linear-gradient(135deg, #7b2cbf, #9d4edd);
+    color: #fff;
+      text-decoration: none;
+}
+/* ===============================
+   MOBILE FIX — INDEX CARDIO
+   =============================== */
+@media (max-width: 768px) {
+
+    /* Container principal */
+    .container,
+    .container-cardio {
+        padding: 12px;
+        width: 100%;
+        overflow-x: hidden;
+    }
+
+    /* Cards */
+    .cards,
+    .cards-cardio {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Card */
+    .card,
+    .card-cardio {
+        width: 100%;
+        min-width: 0;
+    }
+
+    /* Títulos */
+    h2, h3 {
+        font-size: 18px;
+        word-break: break-word;
+    }
+
+    /* Botões */
+    .btn,
+    .btn-iniciar-treino {
+        width: 100%;
+        font-size: 14px;
+        padding: 10px;
+    }
+
+    /* Modal */
+    .modal-content {
+        width: 95%;
+        max-width: 95%;
+        margin: 0 auto;
+        padding: 16px;
+    }
+
+    /* Form */
+    .formTreino select,
+    .formTreino input {
+        width: 100%;
+    }
+
+    /* Paginação (se existir no index) */
+    .paginacao {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .btn-pagina {
+        padding: 4px 8px;
+        font-size: 12px;
+    }
+}
+.modal {
+    padding: 10px;
+}
+
+.modal-content {
+    box-sizing: border-box;
+}
+@media (max-width: 480px) {
+    .modal-content {
+        padding: 12px;
+    }
+}
+/* ===== CARDIO ANDAMENTO ===== */
+
+/* CARD CARDIO */
+.cardio-andamento {
+    max-width: 520px;
+    margin: 30px auto;
+    padding: 20px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+/* INFO */
+.cardio-info {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.cardio-info div {
+    display: flex;
+    flex-direction: column;
+    font-size: 14px;
+}
+
+.cardio-info span {
+    color: #777;
+    font-size: 12px;
+}
+
+/* TIMER */
+.cardio-timer {
+    text-align: center;
+    min-width: 90px;
+}
+
+.cardio-timer h3 {
+    font-size: 28px;
+    margin: 0;
+}
+
+/* BOTÃO */
+.btn-finalizar {
+    background: linear-gradient(135deg, #b04abf, #7b2cbf);
+    color: #fff;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+/* MOBILE */
+@media (max-width: 600px) {
+    .cardio-andamento {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .cardio-info {
+        justify-content: center;
+    }
+
+    .btn-finalizar {
+        width: 100%;
+    }
+}
+/* TÍTULO */
+.titulo-pagina {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* WRAPPER */
+.cardio-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 16px;
+}
+
+/* GRID DE CARDS */
+.cards-cardio {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 30px;
+}
+
+/* CARD */
+.card-cardio {
+    background: #fff;
+    border-radius: 14px;
+    padding: 16px;
+    box-shadow: 0 6px 14px rgba(0,0,0,.06);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.card-cardio h3 {
+    margin: 0;
+    font-size: 10px;
+}
+
+/* INFO */
+.card-cardio .info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: #444;
+}
+
+.card-cardio small {
+    color: #777;
+    font-size: 12px;
+}
+
+/* PAGINAÇÃO */
+.paginacao {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 20px;
+}
+
+.btn-pagina {
+    padding: 4px 10px;
+    font-size: 12px;
+    border-radius: 8px;
+}
+
+.btn-pagina.ativo {
+    background: linear-gradient(135deg, #b04abf, #7b2cbf);
+    color: #fff;
+}
+
+/* BOTÃO VOLTAR */
+.btn-voltar {
+    display: block;
+    margin: 20px auto 0;
+    width: fit-content;
+   
+}
+
+/* MOBILE */
+@media (max-width: 600px) {
+    .card-cardio .info {
+        flex-direction: column;
+        gap: 4px;
+    }
+}
+/* ===== TÍTULO ===== */
+.titulo-pagina {
+    text-align: center;
+    margin: 20px 0 30px;
+    font-size: 1.6rem;
+}
+
+/* ===== GRID DOS CARDS ===== */
+.cards-cardio-home {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+}
+
+/* ===== CARD ===== */
+.card-home {
+    background: #fff;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.card-home h3 {
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+}
+
+.card-home p {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 15px;
+}
+
+/* ===== BOTÕES ===== */
+.btn {
+    border-radius: 999px;
+    padding: 10px 18px;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.btn-primario {
+    background: linear-gradient(90deg, #bc798f, #7e2daf);
+}
+
+.btn-secundario {
+  background: linear-gradient(90deg, #bc798f, #7e2daf);
+    color: #fff;
+}
+
+.btn-outline {
+  background: linear-gradient(90deg, #bc798f, #7e2daf);
+     color: #fff;
+}
+
+.btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+}
+
+/* ===== BOTÃO DESATIVADO ===== */
+.btn-desativado,
+.btn:disabled {
+    background: #ddd;
+    color: #888;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* ===== MOBILE ===== */
+@media (max-width: 480px) {
+    .cards-cardio-home {
+        grid-template-columns: 1fr;
+    }
+
+    .card-home {
+        padding: 18px;
+    }
+}
+.btn-historico {
+    background: linear-gradient(90deg, #bc798f, #7e2daf);
+    color: #ede7f6;
+}
+/* PROGRESSO CARDIO */
+.progress-wrapper {
+    width: 100%;
+    margin: 10px 0 15px;
+    text-align: center;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #eee;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(135deg, #b04abf, #7b2cbf);
+    transition: width 0.5s ease;
+}
+
+.progress-wrapper small {
+    display: block;
+    margin-top: 6px;
+    font-size: 12px;
+    color: #555;
 }
